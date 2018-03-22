@@ -4,7 +4,6 @@ Support for Selve devices.
 from collections import defaultdict
 import logging
 import voluptuous as vol
-from requests.exceptions import RequestException
 
 from homeassistant.const import CONF_PORT
 from homeassistant.helpers import discovery
@@ -17,12 +16,9 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'selve'
 
-TAHOMA_ID_FORMAT = '{}_{}'
-
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
-        vol.Required(CONF_PORT): cv.string,
-        ,
+        vol.Required(CONF_PORT): cv.string,        
     }),
 }, extra=vol.ALLOW_EXTRA)
 
@@ -31,13 +27,18 @@ SELVE_COMPONENTS = [
 ]
 
 SELVE_TYPES = {
-    'rts:RollerShutterRTSComponent': 'cover',
-    'rts:CurtainRTSComponent': 'cover',
-    'io:RollerShutterWithLowSpeedManagementIOComponent': 'cover',
-    'io:RollerShutterVeluxIOComponent': 'cover',
-    'io:RollerShutterGenericIOComponent': 'cover',
-    'io:WindowOpenerVeluxIOComponent': 'cover',
-    'io:LightIOSystemSensor': 'sensor',
+    0:'cover',
+    1:'cover',
+    2:'cover',
+    3:'cover',
+    4:'cover',
+    5:'cover',
+    6:'cover',
+    7:'cover',
+    8:'cover',
+    9:'cover',
+    0:'cover',
+    1:'cover',  
 }
 
 
@@ -47,39 +48,34 @@ def setup(hass, config):
 
     port = config[CONF_PORT]
     try:
-        selve = Gateway(port)
-    except RequestException:
+        selve = Gateway(port, False)
+    except:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
 
     try:
-        api.get_setup()
-        devices = api.get_devices()
-        scenes = api.get_action_groups()
-    except RequestException:
+        selve.discover()        
+        devices = selve.devices()       
+    except:
         _LOGGER.exception("Error when getting devices from the Selve API")
         return False
 
     hass.data[DOMAIN] = {
-        'controller': api,
-        'devices': defaultdict(list),
-        'scenes': []
+        'controller': selve,
+        'devices': defaultdict(list)       
     }
 
     for device in devices:
-        _device = api.get_device(device)
-        if all(ext not in _device.type for ext in exclude):
-            device_type = map_tahoma_device(_device)
+        _device = device
+        if all(ext not in _device.device_type for ext in exclude):
+            device_type = map_selve_device(_device)
             if device_type is None:
                 _LOGGER.warning('Unsupported type %s for Selve device %s',
-                                _device.type, _device.label)
+                                _device.device_type, _device.name)
                 continue
             hass.data[DOMAIN]['devices'][device_type].append(_device)
-
-    for scene in scenes:
-        hass.data[DOMAIN]['scenes'].append(scene)
-
-    for component in TAHOMA_COMPONENTS:
+  
+    for component in SELVE_COMPONENTS:
         discovery.load_platform(hass, component, DOMAIN, {}, config)
 
     return True
@@ -107,11 +103,11 @@ class SelveDevice(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes of the device."""
-        return {'tahoma_device_id': self.tahoma_device.url}
+        return {'selve_device_id': self.selve_device.iveoID}
 
-    def apply_action(self, cmd_name, *args):
-        """Apply Action to Device."""
-        from tahoma_api import Action
-        action = Action(self.tahoma_device.url)
-        action.add_command(cmd_name, *args)
-        self.controller.apply_actions('HomeAssistant', [action])
+    # def apply_action(self, cmd_name, *args):
+    #     """Apply Action to Device."""
+    #     from tahoma_api import Action
+    #     action = Action(self.tahoma_device.url)
+    #     action.add_command(cmd_name, *args)
+    #     self.controller.apply_actions('HomeAssistant', [action])

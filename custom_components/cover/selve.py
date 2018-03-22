@@ -40,7 +40,7 @@ class SelveCover(SelveDevice, CoverDevice):
 
     def set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        position = kwargs.get(ATTR_POSITION)) 
+        position = kwargs.get(ATTR_POSITION) 
         if position == 100:
             self.selve_device.moveDown()
         elif position == 0:

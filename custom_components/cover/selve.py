@@ -4,7 +4,7 @@ Support for Selve cover - shutters etc.
 import logging
 
 from homeassistant.components.cover import CoverDevice, ATTR_POSITION
-from homeassistant.components.selve import (
+from customa_components.selve import (
     DOMAIN as SELVE_DOMAIN, SelveDevice)
 
 DEPENDENCIES = ['selve']
@@ -71,4 +71,4 @@ class SelveCover(SelveDevice, CoverDevice):
 
     def stop_cover(self, **kwargs):
         """Stop the cover."""
-         self.selve_device.stop()         
+        self.selve_device.stop()         

@@ -10,7 +10,7 @@ from homeassistant.helpers import discovery
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-REQUIREMENTS = ['python-selve==1.0.0']
+REQUIREMENTS = ['python-selve==1.1.0']
 
 _LOGGER = logging.getLogger(__name__)
 

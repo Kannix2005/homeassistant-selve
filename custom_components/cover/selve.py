@@ -26,7 +26,7 @@ class SelveCover(SelveDevice, CoverDevice):
 
     def update(self):
         """Update method."""
-        pass
+        self.selve_device.discover_properties()
         #self.controller.get_states([self.tahoma_device])
 
     @property
@@ -71,4 +71,12 @@ class SelveCover(SelveDevice, CoverDevice):
 
     def stop_cover(self, **kwargs):
         """Stop the cover."""
-        self.selve_device.stop()         
+        self.selve_device.stop()
+    
+    def goto_pos1(self, **kwargs):
+        self.selve_device.moveIntermediatePosition1()
+    
+    def goto_pos2(self, **kwargs):
+        self.selve_device.moveIntermediatePosition2()
+    
+        

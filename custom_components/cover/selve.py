@@ -3,22 +3,66 @@ Support for Selve cover - shutters etc.
 """
 import logging
 
+import voluptuous as vol
+
 from homeassistant.components.cover import CoverDevice, ATTR_POSITION
-from customa_components.selve import (
+#import custom_components.selve as selve
+from custom_components.selve import (
     DOMAIN as SELVE_DOMAIN, SelveDevice)
+
+# from homeassistant.const import ATTR_ENTITY_ID
+# import homeassistant.helpers.config_validation as cv
 
 DEPENDENCIES = ['selve']
 
 _LOGGER = logging.getLogger(__name__)
 
+# SERVICE_SET_POS1 = 'selve_set_pos1'
+# SERVICE_SET_POS2 = 'selve_set_pos2'
+
+# SELVE_SERVICE_SCHEMA = vol.Schema({
+#     vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
+# })
+
+
+# SERVICE_TO_METHOD = {
+#     SERVICE_SET_POS1: {'method': 'goto_pos1'},
+#     SERVICE_SET_POS2: {'method': 'goto_pos2'},
+# }
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up Selve covers."""
     controller = hass.data[SELVE_DOMAIN]['controller']
-    devices = []
-    for device in hass.data[SELVE_DOMAIN]['devices']['cover']:
-        devices.append(SelveCover(device, controller))
+    devices = [ SelveCover(device, controller) for device in hass.data[SELVE_DOMAIN]['devices']['cover']]
     add_devices(devices, True)
+
+    # def service_handler(service):
+    #     """Map services to methods on Selve."""
+    #     method = SERVICE_TO_METHOD.get(service.service)
+    #     params = {key: value for key, value in service.data.items()
+    #               if key != ATTR_ENTITY_ID}
+    #     entity_ids = service.data.get(ATTR_ENTITY_ID)
+    #     if entity_ids:
+    #         devices = [device for device in hass.data[SELVE_DOMAIN].values() if
+    #                    device.entity_id in entity_ids]
+    #     else:
+    #         devices = hass.data[SELVE_DOMAIN].values()
+
+    #     update_tasks = []
+    #     for device in devices:
+    #         if not hasattr(device, method['method']):
+    #             continue
+    #         await getattr(device, method['method'])(**params)
+    #         update_tasks.append(device.async_update_ha_state(True))
+
+    #     if update_tasks:
+    #         await asyncio.wait(update_tasks, loop=hass.loop)
+
+    # for selve_service in SERVICE_TO_METHOD:
+    #     schema = SERVICE_TO_METHOD[selve_service].get(
+    #         'schema', SELVE_SERVICE_SCHEMA)
+    #     hass.services.register(
+    #         SELVE_DOMAIN, selve_service, service_handler, schema=schema)
 
 
 class SelveCover(SelveDevice, CoverDevice):

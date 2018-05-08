@@ -6,7 +6,7 @@ import logging
 import voluptuous as vol
 
 from homeassistant.const import CONF_PORT
-from homeassistant.helpers import discovery
+from homeassistant.helpers.discovery import load_platform
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
@@ -75,7 +75,7 @@ def setup(hass, config):
         hass.data[DOMAIN]['devices'][device_type].append(_device)
   
     for component in SELVE_COMPONENTS:
-        discovery.load_platform(hass, component, DOMAIN, {}, config)
+        load_platform(hass, component, DOMAIN)
 
     return True
 

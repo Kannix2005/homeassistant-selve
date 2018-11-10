@@ -37,8 +37,6 @@ SELVE_TYPES = {
     7:'cover',
     8:'cover',
     9:'cover',
-    0:'cover',
-    1:'cover',  
 }
 
 
@@ -103,10 +101,3 @@ class SelveDevice(Entity):
     def device_state_attributes(self):
         """Return the state attributes of the device."""
         return {'selve_device_id': self.selve_device.iveoID}
-
-    # def apply_action(self, cmd_name, *args):
-    #     """Apply Action to Device."""
-    #     from tahoma_api import Action
-    #     action = Action(self.tahoma_device.url)
-    #     action.add_command(cmd_name, *args)
-    #     self.controller.apply_actions('HomeAssistant', [action])

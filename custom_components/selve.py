@@ -73,7 +73,7 @@ def setup(hass, config):
         hass.data[DOMAIN]['devices'][device_type].append(_device)
   
     for component in SELVE_COMPONENTS:
-        load_platform(hass, component, DOMAIN)
+        load_platform(hass, component, DOMAIN, {}, config)
 
     return True
 

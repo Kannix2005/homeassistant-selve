@@ -1,0 +1,9 @@
+{
+    "domain": "selve",
+    "name": "Selve",
+    "documentation": "https://home-assistant.io/components/selve/",
+    "dependencies": [],
+    "codeowners": ["@gpulido"],
+    "requirements": ["python-selve==1.2.1"]
+  }
+  

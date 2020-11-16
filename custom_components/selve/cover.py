@@ -6,9 +6,9 @@ import logging
 import voluptuous as vol
 
 from homeassistant.components.cover import (
-    CoverDevice, ATTR_POSITION, SUPPORT_OPEN, SUPPORT_CLOSE, SUPPORT_STOP,
-    SUPPORT_OPEN_TILT, SUPPORT_CLOSE_TILT, SUPPORT_STOP_TILT, SUPPORT_SET_POSITION, SUPPORT_SET_TILT_POSITION)
-
+    CoverEntity, ATTR_POSITION, SUPPORT_OPEN, SUPPORT_CLOSE, SUPPORT_STOP,
+    SUPPORT_OPEN_TILT, SUPPORT_CLOSE_TILT, SUPPORT_STOP_TILT, SUPPORT_SET_POSITION, SUPPORT_SET_TILT_POSITION,
+    DEVICE_CLASS_WINDOW, DEVICE_CLASS_BLIND, DEVICE_CLASS_AWNING, DEVICE_CLASS_SHUTTER)
 from custom_components.selve import (
     DOMAIN as SELVE_DOMAIN, SelveDevice)
 
@@ -26,6 +26,21 @@ SELVE_SERVICE_SCHEMA = vol.Schema({
     vol.Optional(ATTR_ENTITY_ID): cv.entity_ids,
 })
 
+SELVE_CLASSTYPES = {
+    0:None,
+    1:DEVICE_CLASS_SHUTTER,
+    2:DEVICE_CLASS_BLIND,
+    3:DEVICE_CLASS_SHUTTER,
+    4:'cover',
+    5:'cover',
+    6:'cover',
+    7:'cover',
+    8:'cover',
+    9:'cover',
+    10:'cover',
+    11:'cover',
+}
+
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up Selve covers."""
@@ -34,7 +49,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices(devices, True)
 
 
-class SelveCover(SelveDevice, CoverDevice):
+class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""
 
     def update(self):
@@ -52,7 +67,7 @@ class SelveCover(SelveDevice, CoverDevice):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        return None
+        return 50
     
     @property
     def current_cover_tilt_position(self):
@@ -60,7 +75,7 @@ class SelveCover(SelveDevice, CoverDevice):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        return None
+        return 50
  
     @property
     def is_closed(self):
@@ -71,8 +86,8 @@ class SelveCover(SelveDevice, CoverDevice):
 
     @property
     def device_class(self):
-        """Return the class of the device."""        
-        return None
+        """Return the class of the device.""" 
+        return SELVE_CLASSTYPES.get(self.selve_device.device_type.value)
     
 
     def open_cover(self, **kwargs):

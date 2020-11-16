@@ -37,7 +37,11 @@ SELVE_TYPES = {
     7:'cover',
     8:'cover',
     9:'cover',
+    10:'cover',
+    11:'cover',
 }
+
+
 
 
 def setup(hass, config):
@@ -90,7 +94,12 @@ class SelveDevice(Entity):
         """Initialize the device."""
         self.selve_device = selve_device
         self.controller = controller
-        self._name = self.selve_device.name
+        self._name = self.selve_device.name        
+
+    @property
+    def unique_id(self):
+        """Return the unique id base on the id returned by Somfy."""
+        return self.selve_device.iveoID
 
     @property
     def name(self):

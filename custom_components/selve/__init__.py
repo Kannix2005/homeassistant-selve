@@ -10,7 +10,7 @@ from homeassistant.helpers.discovery import load_platform
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 
-REQUIREMENTS = ['python-selve==1.2.1']
+REQUIREMENTS = ['python-selve-new==1.0.1.3']
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -95,11 +95,12 @@ class SelveDevice(Entity):
         self.selve_device = selve_device
         self.controller = controller
         self._name = self.selve_device.name        
+        self.selve_device.openState = 50
 
     @property
     def unique_id(self):
         """Return the unique id base on the id returned by Somfy."""
-        return self.selve_device.iveoID
+        return self.selve_device.ID
 
     @property
     def name(self):
@@ -109,4 +110,4 @@ class SelveDevice(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes of the device."""
-        return {'selve_device_id': self.selve_device.iveoID}
+        return {'selve_device_id': self.selve_device.ID}

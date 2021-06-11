@@ -4,6 +4,7 @@
     "documentation": "https://home-assistant.io/components/selve/",
     "dependencies": [],
     "codeowners": ["@gpulido"],
-    "requirements": ["python-selve==1.2.1"]
-  }
-  
+    "requirements": ["python-selve-new==1.0.1.8"],
+    "version": "1.0.0",
+    "iot_class": "local_polling"
+}

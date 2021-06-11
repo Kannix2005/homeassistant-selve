@@ -67,7 +67,7 @@ class SelveCover(SelveDevice, CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        return 50
+        return self.selve_device.openState
     
     @property
     def current_cover_tilt_position(self):
@@ -75,7 +75,7 @@ class SelveCover(SelveDevice, CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        return 50
+        return self.selve_device.openState
  
     @property
     def is_closed(self):
@@ -92,26 +92,32 @@ class SelveCover(SelveDevice, CoverEntity):
 
     def open_cover(self, **kwargs):
         """Open the cover."""
-        self.selve_device.moveUp() 
+        self.selve_device.moveUpIveo() 
+        self.selve_device.openState = 100
 
     def open_cover_tilt(self, **kwargs):
         """Open the cover."""
         self.selve_device.moveIntermediatePosition1()        
+        self.selve_device.openState = 100
 
     def close_cover(self, **kwargs):
         """Close the cover."""
         self.selve_device.moveDown()  
+        self.selve_device.openState = 0
 
     def close_cover_tilt(self, **kwargs):
         """Open the cover."""
-        self.selve_device.moveIntermediatePosition2()        
+        self.selve_device.moveIntermediatePosition2()     
+        self.selve_device.openState = 0   
 
     def stop_cover(self, **kwargs):
         """Stop the cover."""
         self.selve_device.stop()
+        self.selve_device.openState = 50
     
     def stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
         self.selve_device.stop()
+        self.selve_device.openState = 50
     
         

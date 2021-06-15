@@ -15,7 +15,7 @@ from homeassistant.helpers.entity import Entity
 from selve import Gateway
 
 REQUIREMENTS = ["python-selve-new"]
-PLATFORMS = ["cover", "switch", "light", "climate"]
+PLATFORMS = ["cover"]#, "switch", "light", "climate"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
     hass.data[DOMAIN] = {"controller": selve, "devices": defaultdict(list)}
 
     try:
-        selve.discover()
+        await selve.discover()
         devices = list(selve.devices.values())
     except:
         _LOGGER.exception("Error when getting devices from the Selve API")

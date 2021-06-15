@@ -74,11 +74,11 @@ class SelveCover(SelveDevice, CoverEntity):
         super().__init__(device, controller)
         self.selve_device.openState = None
 
-    def update(self):
+    async def async_update(self):
         """Update method."""
-        self.selve_device.discover_properties()
+        await self.selve_device.discover_properties()
         if self.isCommeo():
-            self.selve_device.getDeviceValues()
+            await self.selve_device.getDeviceValues()
 
     def isCommeo(self):
         return self.selve_device.communicationType.name == "COMMEO"
@@ -158,37 +158,37 @@ class SelveCover(SelveDevice, CoverEntity):
         """Return the class of the device."""
         return SELVE_CLASSTYPES.get(self.selve_device.device_type.value)
 
-    def open_cover(self, **kwargs):
+    async def async_open_cover(self, **kwargs):
         """Open the cover."""
-        self.selve_device.moveUp()
+        await self.selve_device.moveUp()
         self.selve_device.openState = 100
 
-    def open_cover_tilt(self, **kwargs):
+    async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
-        self.selve_device.moveIntermediatePosition1()
+        await self.selve_device.moveIntermediatePosition1()
         self.selve_device.openState = 100
 
-    def close_cover(self, **kwargs):
+    async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        self.selve_device.moveDown()
+        await self.selve_device.moveDown()
         self.selve_device.openState = 0
 
-    def close_cover_tilt(self, **kwargs):
+    async def async_close_cover_tilt(self, **kwargs):
         """Open the cover."""
-        self.selve_device.moveIntermediatePosition2()
+        await self.selve_device.moveIntermediatePosition2()
         self.selve_device.openState = 0
 
-    def stop_cover(self, **kwargs):
+    async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        self.selve_device.stop()
+        await self.selve_device.stop()
         self.selve_device.openState = 50
 
-    def stop_cover_tilt(self, **kwargs):
+    async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
-        self.selve_device.stop()
+        await self.selve_device.stop()
         self.selve_device.openState = 50
 
-    def set_cover_position(self, **kwargs):
+    async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         _position = kwargs.get(ATTR_POSITION)
-        self.selve_device.driveToPos(_position)
+        await self.selve_device.driveToPos(_position)

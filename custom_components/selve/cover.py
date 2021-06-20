@@ -1,6 +1,7 @@
 """
 Support for Selve cover - shutters etc.
 """
+from .const import DOMAIN
 from homeassistant.core import callback
 import logging
 
@@ -76,16 +77,17 @@ class SelveCover(SelveDevice, CoverEntity):
 
     async def async_update(self):
         """Update method."""
-        await self.selve_device.discover_properties()
         if self.isCommeo():
             await self.selve_device.getDeviceValues()
+            _LOGGER.debug("Value: " + str(self.selve_device.name))
+            _LOGGER.debug("Value: " + str(self.selve_device.value))
 
     def isCommeo(self):
         return self.selve_device.communicationType.name == "COMMEO"
 
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
-
+    
     @property
     def supported_features(self):
         """Flag supported features."""
@@ -118,8 +120,7 @@ class SelveCover(SelveDevice, CoverEntity):
         0 is closed, 100 is fully open.
         """
         if self.isCommeo():
-            self.selve_device.getDeviceValues()
-            self.selve_device.openState = self.selve_device.value
+            self.selve_device.openState = 100 - self.selve_device.value
 
         return self.selve_device.openState
 
@@ -130,8 +131,7 @@ class SelveCover(SelveDevice, CoverEntity):
         0 is closed, 100 is fully open.
         """
         if self.isCommeo():
-            self.selve_device.getDeviceValues()
-            self.selve_device.openState = self.selve_device.value
+            self.selve_device.openState = 100 - self.selve_device.value
 
         return self.selve_device.openState
 
@@ -161,34 +161,56 @@ class SelveCover(SelveDevice, CoverEntity):
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         await self.selve_device.moveUp()
-        self.selve_device.openState = 100
+        if self.isIveo():
+            self.selve_device.openState = 100
+        if self.isCommeo():
+            await self.selve_device.getDeviceValues()
 
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
         await self.selve_device.moveIntermediatePosition1()
-        self.selve_device.openState = 100
+        
+        if self.isIveo():
+            self.selve_device.openState = 100
+        if self.isCommeo():
+            await self.selve_device.getDeviceValues()
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         await self.selve_device.moveDown()
-        self.selve_device.openState = 0
+        
+        if self.isIveo():
+            self.selve_device.openState = 0
+        if self.isCommeo():
+            await self.selve_device.getDeviceValues()
 
     async def async_close_cover_tilt(self, **kwargs):
         """Open the cover."""
         await self.selve_device.moveIntermediatePosition2()
-        self.selve_device.openState = 0
+        
+        if self.isIveo():
+            self.selve_device.openState = 0
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         await self.selve_device.stop()
-        self.selve_device.openState = 50
+        
+        if self.isIveo():
+            self.selve_device.openState = 50
+        if self.isCommeo():
+            await self.selve_device.getDeviceValues()
 
     async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
         await self.selve_device.stop()
-        self.selve_device.openState = 50
+        
+        if self.isIveo():
+            self.selve_device.openState = 50
+        if self.isCommeo():
+            await self.selve_device.getDeviceValues()
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        _position = kwargs.get(ATTR_POSITION)
+        _position = 100 - kwargs.get(ATTR_POSITION)
         await self.selve_device.driveToPos(_position)
+        await self.selve_device.getDeviceValues()

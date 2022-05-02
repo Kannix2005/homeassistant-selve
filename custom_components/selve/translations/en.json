@@ -1,0 +1,18 @@
+{
+    "config": {
+        "title": "Selve NG",
+        "step": {
+            "user": {
+                "title": "Port setup",
+                "description": "Enter your full port, e.g.: /dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DM01F76A-if00-port0",
+                "data": {
+                    "port": "Port path"
+                }
+            }
+        },
+        "error": {
+            "gateway_not_ready": "Gateway seems to be not ready. Is it properly connected?",
+            "invalid_port": "Port seems to be incorrect"
+        }
+    }
+}

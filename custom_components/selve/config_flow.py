@@ -1,5 +1,6 @@
 """Config flow for selvetest integration."""
 from __future__ import annotations
+from collections import OrderedDict
 
 import logging
 from typing import Any
@@ -12,12 +13,14 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from selve import Gateway
 
-from .const import DOMAIN
+from .const import (DOMAIN, CONF_PORT)
 
 _LOGGER = logging.getLogger(__name__)
 
 # TODO adjust the data schema to the data that you need
-STEP_USER_DATA_SCHEMA = vol.Schema({"port": str})
+data_schema = OrderedDict()
+data_schema[vol.Required(CONF_PORT, default="port")] = str
+STEP_USER_DATA_SCHEMA = vol.Schema(data_schema)
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
@@ -31,14 +34,16 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     # await hass.async_add_executor_job(
     #     your_validate_func, data["username"], data["password"]
     # )
+    
+    
     try:
-        gateway = Gateway(data["port"])
+        gateway = Gateway(data[CONF_PORT])
     except Exception as e:
         raise ConnectionError
 
 
     if not await gateway.gatewayReady():
-        raise ConnectionError
+        raise GatewayNotReadyError
 
     # If you cannot connect:
     # throw CannotConnect
@@ -46,7 +51,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     # InvalidAuth
 
     # Return info that you want to store in the config entry.
-    return {"port": data["port"]}
+    return {CONF_PORT: data[CONF_PORT]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -62,27 +67,28 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
-
+        
         errors = {}
 
         try:
             info = await validate_input(self.hass, user_input)
-        except CannotConnect:
-            errors["base"] = "cannot_connect"
+        except GatewayNotReadyError:
+            _LOGGER.exception("gateway not ready")
+            errors["base"] = "gateway_not_ready"
         except ConnectionError:
-            errors["base"] = "cannot_connect"
+            errors["base"] = "invalid_port"
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            return self.async_create_entry(title=info["Gateway"], data=user_input)
+            return self.async_create_entry(title=self.domain, data=info)
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
 
 
-class CannotConnect(HomeAssistantError):
+class GatewayNotReadyError(HomeAssistantError):
     """Error to indicate we cannot connect."""
 
 

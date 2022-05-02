@@ -13,7 +13,8 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from selve import Gateway
 
-from .const import (DOMAIN, CONF_PORT)
+from .const import (DOMAIN)
+from homeassistant.const import (CONF_PORT)
 
 _LOGGER = logging.getLogger(__name__)
 

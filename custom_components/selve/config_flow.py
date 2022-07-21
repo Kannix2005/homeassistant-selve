@@ -11,7 +11,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
-from selve import Gateway
+from selve import *
 
 from .const import (DOMAIN)
 from homeassistant.const import (CONF_PORT)

@@ -9,7 +9,8 @@ import voluptuous as vol
 
 from homeassistant import config_entries, core, exceptions
 from homeassistant.core import HomeAssistant, callback
-#from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.exceptions import HomeAssistantError
 from selve import *
 
 from .const import (DOMAIN)

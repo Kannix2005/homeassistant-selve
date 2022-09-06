@@ -72,7 +72,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         port = device_config[CONF_PORT]
         return self.async_create_entry(
-            title=self.domain,
+            title=DOMAIN,
             data=device_config
         )
 
@@ -94,7 +94,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
             try:
                 info = await validate_input(self.hass, user_input)
-                return self.async_create_entry(title=self.domain, data=user_input)
+                return self.async_create_entry(title=DOMAIN, data=user_input)
             except GatewayNotReadyError:
                 _LOGGER.exception("gateway not ready")
                 errors["base"] = "gateway_not_ready"

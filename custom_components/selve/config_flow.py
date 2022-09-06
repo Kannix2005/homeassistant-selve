@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # TODO adjust the data schema to the data that you need
 data_schema = OrderedDict()
-data_schema[vol.Required(CONF_PORT, default="port")] = str
+data_schema[vol.Required(CONF_PORT, default="/dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DM01F76A-if00-port0")] = str
 STEP_USER_DATA_SCHEMA = vol.Schema(data_schema)
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:

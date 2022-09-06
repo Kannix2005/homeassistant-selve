@@ -4,6 +4,7 @@ Support for Selve devices.
 
 from __future__ import annotations
 from homeassistant.components import discovery
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN, SELVE_TYPES
 from collections import defaultdict
@@ -12,6 +13,9 @@ import voluptuous as vol
 from homeassistant.const import CONF_PORT
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity_registry import (
+    async_get_registry as async_get_entity_registry,
+)
 from selve import Gateway
 
 REQUIREMENTS = ["python-selve-new"]
@@ -30,22 +34,52 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-
 async def async_setup(hass: HomeAssistant, config: dict):
+    """Configure the Ecowitt component using YAML."""
+    hass.data.setdefault(DOMAIN, {})
+
+    if DOMAIN in config:
+        data = {
+            CONF_PORT: config[DOMAIN][CONF_PORT],
+            CONF_NAME: None,
+        }
+
+        hass.components.persistent_notification.create(
+            "Selve NG configuration has been migrated from yaml format "
+            "to a config_flow. Your options and settings should have been "
+            "migrated automatically.  Verify them in the Configuration -> "
+            "Integrations menu, and then delete the ecowitt section from "
+            "your yaml file.",
+            title="Selve NG",
+            notification_id=DOMAIN,
+        )
+        hass.async_create_task(
+            hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": SOURCE_IMPORT}, data=data
+            )
+        )
+    return True
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up the Hello World component."""
     # Ensure our name space for storing objects is a known type. A dict is
     # common/preferred as it allows a separate instance of your class for each
     # instance that has been created in the UI.
-    hass.data.setdefault(DOMAIN, {})
+    if hass.data.get(DOMAIN) is None:
+        hass.data.setdefault(DOMAIN, {})
 
-    serial_port = config[DOMAIN][CONF_PORT]
+
+    hass.data[DOMAIN][entry.entry_id] = {}
+    selve_data = hass.data[DOMAIN][entry.entry_id]
+    for pl in PLATFORMS:
+        selve_data["registered"][pl] = []
+
+    serial_port = entry.data[CONF_PORT]
     try:
         selve = Gateway(serial_port, False)
     except:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
-
-    hass.data[DOMAIN] = {"controller": selve, "devices": defaultdict(list)}
 
     try:
         await selve.discover()
@@ -54,7 +88,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
         _LOGGER.exception("Error when getting devices from the Selve API")
         return False
 
-    hass.data[DOMAIN] = {"controller": selve, "devices": defaultdict(list)}
+    hass.data[DOMAIN][entry.entry_id] = {"controller": selve, "devices": defaultdict(list)}
 
     for device in devices:
         _device = device
@@ -66,13 +100,13 @@ async def async_setup(hass: HomeAssistant, config: dict):
                 _device.name,
             )
             continue
-        hass.data[DOMAIN]["devices"][device_type].append(_device)
+        hass.data[DOMAIN][entry.entry_id]["devices"][device_type].append(_device)
 
     for platform in PLATFORMS:
         hass.async_create_task(
-            discovery.async_load_platform(hass, platform, DOMAIN, {}, config)
+            discovery.async_load_platform(hass, platform, DOMAIN, {}, ConfigEntry)
         )
-    return True
+
 
 
 def map_selve_device(selve_device):

@@ -55,7 +55,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     # InvalidAuth
 
     # Return info that you want to store in the config entry.
-    return {CONF_PORT: data[CONF_PORT]}
+    #return {CONF_PORT: data[CONF_PORT]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -79,7 +79,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
         
             try:
-                info = await validate_input(self.hass, user_input)
+                await validate_input(self.hass, user_input)
                 return self.async_create_entry(title=DOMAIN, data=user_input)
             except GatewayNotReadyError:
                 _LOGGER.exception("gateway not ready")

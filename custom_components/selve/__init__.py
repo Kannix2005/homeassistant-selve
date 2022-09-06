@@ -54,41 +54,43 @@ async def async_setup(hass: HomeAssistant, config: dict):
     # instance that has been created in the UI.
     hass.data.setdefault(DOMAIN, {})
 
-    if DOMAIN in config:
+    return true
 
-        serial_port = config[DOMAIN][CONF_PORT]
-        try:
-            selve = Gateway(serial_port, False)
-        except:
-            _LOGGER.exception("Error when trying to connect to the selve gateway")
-            return False
+    # if DOMAIN in config:
 
-        try:
-            await selve.discover()
-            devices = list(selve.devices.values())
-        except:
-            _LOGGER.exception("Error when getting devices from the Selve API")
-            return False
+    #     serial_port = config[DOMAIN][CONF_PORT]
+    #     try:
+    #         selve = Gateway(serial_port, False)
+    #     except:
+    #         _LOGGER.exception("Error when trying to connect to the selve gateway")
+    #         return False
 
-        hass.data[DOMAIN] = {"controller": selve, "devices": defaultdict(list)}
+    #     try:
+    #         await selve.discover()
+    #         devices = list(selve.devices.values())
+    #     except:
+    #         _LOGGER.exception("Error when getting devices from the Selve API")
+    #         return False
 
-        for device in devices:
-            _device = device
-            device_type = map_selve_device(_device)
-            if device_type is None:
-                _LOGGER.warning(
-                    "Unsupported type %s for Selve device %s",
-                    _device.device_type,
-                    _device.name,
-                )
-                continue
-            hass.data[DOMAIN]["devices"][device_type].append(_device)
+    #     hass.data[DOMAIN] = {"controller": selve, "devices": defaultdict(list)}
 
-        for platform in PLATFORMS:
-            hass.async_create_task(
-                discovery.async_load_platform(hass, platform, DOMAIN, {}, config)
-            )
-    return True
+    #     for device in devices:
+    #         _device = device
+    #         device_type = map_selve_device(_device)
+    #         if device_type is None:
+    #             _LOGGER.warning(
+    #                 "Unsupported type %s for Selve device %s",
+    #                 _device.device_type,
+    #                 _device.name,
+    #             )
+    #             continue
+    #         hass.data[DOMAIN]["devices"][device_type].append(_device)
+
+    #     for platform in PLATFORMS:
+    #         hass.async_create_task(
+    #             discovery.async_load_platform(hass, platform, DOMAIN, {}, config)
+    #         )
+    # return True
 
 
 def map_selve_device(selve_device):

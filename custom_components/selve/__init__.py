@@ -71,8 +71,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.data[DOMAIN][entry.entry_id] = {}
     selve_data = hass.data[DOMAIN][entry.entry_id]
-    for pl in PLATFORMS:
-        selve_data["registered"][pl] = []
+    #for pl in PLATFORMS:
+    #    selve_data["registered"][pl] = []
 
     serial_port = entry.data[CONF_PORT]
     try:

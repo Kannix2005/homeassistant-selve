@@ -3,6 +3,10 @@
         "title": "Selve NG",
         "step": {
             "user": {
+                "description": "Please connect your Selve USB Stick to your system and check the port under Settings -> System -> Hardware -> click on the dots in the top right corner and on Show all Hardware. There you can see all connected devices. Search for an FTDI device and copy its port.",
+                "title": "Instructions for setting up the Selve NG integration."
+            },
+            "initial_options": {
                 "title": "Port setup",
                 "description": "Enter your full port, e.g.: /dev/serial/by-id/usb-FTDI_FT230X_Basic_UART_DM01F76A-if00-port0",
                 "data": {
@@ -13,6 +17,10 @@
         "error": {
             "gateway_not_ready": "Gateway seems to be not ready. Is it properly connected?",
             "invalid_port": "Port seems to be incorrect"
+        },
+        "abort": {
+            "already_configured": "Device is already configured.",
+            "unknown": "Unknown error."
         }
     }
 }

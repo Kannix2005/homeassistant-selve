@@ -62,20 +62,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for selve."""
 
     VERSION = 1
-
-    async def async_step_import(self, device_config):
-        """Import a configuration.yaml config, if any."""
-        try:
-            await validate_input(self.hass, device_config)
-        except AlreadyConfigured:
-            return self.async_abort(reason="already_configured")
-
-        port = device_config[CONF_PORT]
-        return self.async_create_entry(
-            title=DOMAIN,
-            data=device_config
-        )
-
     
     async def async_step_user(self, user_input=None):
         """Give initial instructions for setup."""

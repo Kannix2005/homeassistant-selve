@@ -47,7 +47,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     #if not await gateway.gatewayReady():
     #    raise GatewayNotReadyError
 
-    known_devices = gateway.list_devices()
+    #known_devices = gateway.list_devices()
 
     # If you cannot connect:
     # throw CannotConnect
@@ -99,7 +99,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("gateway not ready")
                 errors["base"] = "gateway_not_ready"
             except ConnectionError:
-                _LOGGER.exception("invalid port: " + user_input)
+                _LOGGER.exception("invalid port")
                 errors["base"] = "invalid_port"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")

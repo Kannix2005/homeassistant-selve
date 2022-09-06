@@ -43,8 +43,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         raise ConnectionError
 
 
-    if not await gateway.gatewayReady():
-        raise GatewayNotReadyError
+    #if not await gateway.gatewayReady():
+    #    raise GatewayNotReadyError
+
+    known_devices = gateway.list_devices()
 
     # If you cannot connect:
     # throw CannotConnect

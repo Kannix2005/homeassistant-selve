@@ -58,15 +58,14 @@ SELVE_CLASSTYPES = {
 }
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up Selve covers."""
-
-    controller = entry["controller"]
+    controller = config["controller"]
     devices = [
         SelveCover(device, controller)
-        for device in entry["devices"]["cover"]
+        for device in config["devices"]["cover"]
     ]
-    async_add_devices(devices, True)
+    add_devices(devices, True)
 
 
 class SelveCover(SelveDevice, CoverEntity):

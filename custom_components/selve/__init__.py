@@ -34,6 +34,18 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> bool:
+    """Set up platform from a ConfigEntry."""
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = entry.data
+
+    # Forward the setup to the cover platform.
+    hass.async_create_task(
+        hass.config_entries.async_forward_entry_setup(entry, "cover")
+    )
+    return True
 
 async def async_setup(hass: HomeAssistant, config: dict):
     """Set up the Selve component."""

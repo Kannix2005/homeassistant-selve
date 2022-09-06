@@ -69,8 +69,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    """Set up the Demo config entry."""
-    await async_setup_platform(hass, {}, async_add_entities)
+    config = hass.data[DOMAIN][config_entry.entry_id]
+    await async_setup_platform(hass, config, async_add_entities)
 
 class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""

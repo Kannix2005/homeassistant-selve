@@ -66,13 +66,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     serial_port = config[CONF_PORT]
     try:
         selve = Gateway(serial_port, False)
+        await selve.discover()
+        devicesGW = list(selve.devices.values())
     except:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
 
     devices = [
         SelveCover(device, selve)
-        for device in config["devices"]["cover"]
+        for device in devicesGW
     ]
     async_add_entities(devices, True)
 
@@ -83,12 +85,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     serial_port = config[CONF_PORT]
     try:
         selve = Gateway(serial_port, False)
+        await selve.discover()
+        devicesGW = list(selve.devices.values())
     except:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
     devices = [
         SelveCover(device, selve)
-        for device in config["devices"]["cover"]
+        for device in devicesGW
     ]
     async_add_entities(devices, True)
 

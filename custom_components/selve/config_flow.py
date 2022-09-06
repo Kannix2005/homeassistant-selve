@@ -40,7 +40,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     try:
         gateway = Gateway(data[CONF_PORT])
     except Exception as e:
-        _LOGGER.exception(e.with_traceback())
+        _LOGGER.exception(e)
         raise ConnectionError
 
 

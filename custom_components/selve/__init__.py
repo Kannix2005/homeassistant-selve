@@ -54,7 +54,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
     # instance that has been created in the UI.
     hass.data.setdefault(DOMAIN, {})
 
-    return true
+    return True
 
     # if DOMAIN in config:
 

@@ -62,9 +62,16 @@ SELVE_CLASSTYPES = {
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up Selve covers."""
-    controller = config["controller"]
+
+    serial_port = config[CONF_PORT]
+    try:
+        selve = Gateway(serial_port, False)
+    except:
+        _LOGGER.exception("Error when trying to connect to the selve gateway")
+        return False
+
     devices = [
-        SelveCover(device, controller)
+        SelveCover(device, selve)
         for device in config["devices"]["cover"]
     ]
     async_add_entities(devices, True)
@@ -79,9 +86,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     except:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
-    config["controller"] = selve
-
-    await async_setup_platform(hass, config, async_add_entities)
+    devices = [
+        SelveCover(device, selve)
+        for device in config["devices"]["cover"]
+    ]
+    async_add_entities(devices, True)
 
 class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""

@@ -1,7 +1,7 @@
 {
     "domain": "selve",
     "name": "Selve NG",
-    "documentation": "https://home-assistant.io/components/selve/",
+    "documentation": "https://github.com/Kannix2005/homeassistant-selve",
     "issue_tracker": "https://github.com/Kannix2005/homeassistant-selve/issues",
     "dependencies": ["discovery"],
     "codeowners": ["@Kannix2005"],

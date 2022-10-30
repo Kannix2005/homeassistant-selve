@@ -1,6 +1,7 @@
 """
 Support for Selve devices.
 """
+
 from __future__ import annotations
 from homeassistant.components import discovery
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
@@ -113,7 +114,7 @@ class SelveDevice(Entity):
     @property
     def unique_id(self):
         """Return the unique id base on the id returned by gateway."""
-        return self.selve_device.ID
+        return self.selve_device.device_type + self.selve_device.ID
 
     @property
     def name(self):

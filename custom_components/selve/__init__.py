@@ -1,7 +1,6 @@
 """
 Support for Selve devices.
 """
-
 from __future__ import annotations
 from homeassistant.components import discovery
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry

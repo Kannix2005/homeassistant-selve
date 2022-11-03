@@ -212,5 +212,5 @@ class SelveCover(SelveDevice, CoverEntity):
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         _position = 100 - kwargs.get(ATTR_POSITION)
-        self.controller.moveDevicePos(_position)
+        self.controller.moveDevicePos(self.selve_device, _position)
         self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)

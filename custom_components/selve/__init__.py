@@ -87,7 +87,7 @@ class SelveDevice(Entity):
     @property
     def unique_id(self):
         """Return the unique id base on the id returned by gateway."""
-        return self.selve_device.device_type + self.selve_device.id
+        return str(self.selve_device.device_type.value) + str(self.selve_device.id)
 
     @property
     def name(self):

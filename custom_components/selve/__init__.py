@@ -76,9 +76,9 @@ class SelveDevice(Entity):
 
     def __init__(self, selve_device, controller):
         """Initialize the device."""
-        self.selve_device: SD | ID = selve_device
+        self.selve_device = selve_device
         self.controller: Selve = controller
-        self._name = self.selve_device.name
+        self._name = str(self.selve_device.name)
 
     @callback
     def async_register_callbacks(self):

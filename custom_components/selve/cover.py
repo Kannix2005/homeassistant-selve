@@ -78,11 +78,17 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     except PortError:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
-    devices = [
-        SelveCover(device, selve)
-        for device in dict(selve.devices["device"].items() | selve.devices["iveo"].items())
-    ]
-    async_add_entities(devices, True)
+    
+    i = 0
+    devicelist = {}
+    for device in selve.devices["device"]:
+        devicelist[i] = SelveCover(device, selve)
+        i = i + 1
+    for device in selve.devices["iveo"]:
+        devicelist[i] = SelveCover(device, selve)
+        i = i + 1
+    
+    async_add_entities(devicelist, True)
 
 
 class SelveCover(SelveDevice, CoverEntity):

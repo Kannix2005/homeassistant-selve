@@ -34,7 +34,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data = {}
 
         try:
-            gateway = Selve(None, loop=self.hass.loop, discover=False, logger=_LOGGER)
+            gateway = Selve(None, discover=False, logger=_LOGGER)
             data["port"] = gateway._port
             return self.async_create_entry(title="Selve Gateway", data=data)
 

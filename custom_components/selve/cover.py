@@ -59,11 +59,16 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
 
-    devices = [
-        SelveCover(device, selve)
-        for device in (selve.devices["device"] + selve.devices["iveo"])
-    ]
-    async_add_entities(devices, True)
+    i = 0
+    devicelist = []
+    for id, device in selve.devices["device"].items():
+        devicelist[i] = SelveCover(selve.devices["device"][id], selve)
+        i = i + 1
+    for id, device in selve.devices["iveo"].items():
+        devicelist[i] = SelveCover(selve.devices["iveo"][id], selve)
+        i = i + 1
+    
+    async_add_entities(devicelist, True)
 
     selve.register_callback(hass.async_write_ha_state)
 
@@ -79,16 +84,16 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
     
-    i = 0
-    devicelist = {}
-    for id, device in selve.devices["device"].items():
-        devicelist[i] = SelveCover(device, selve)
-        i = i + 1
-    for id, device in selve.devices["iveo"].items():
-        devicelist[i] = SelveCover(device, selve)
-        i = i + 1
+    devicelist = []
+    for id in selve.devices["device"]:
+        devicelist.append(SelveCover(selve.devices["device"][id], selve))
+
+    for id in selve.devices["iveo"]:
+        devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
     
     async_add_entities(devicelist, True)
+    
+    selve.register_callback(hass.async_write_ha_state)
 
 
 class SelveCover(SelveDevice, CoverEntity):

@@ -80,7 +80,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         return False
     devices = [
         SelveCover(device, selve)
-        for device in (selve.devices["device"] + selve.devices["iveo"])
+        for device in dict(selve.devices["device"].items() | selve.devices["iveo"].items())
     ]
     async_add_entities(devices, True)
 

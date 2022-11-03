@@ -18,6 +18,7 @@ from . import SelveDevice
 
 from homeassistant.const import ATTR_ENTITY_ID
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 DEPENDENCIES = ["selve"]
 
@@ -48,7 +49,7 @@ SELVE_CLASSTYPES = {
 }
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities: AddEntitiesCallback, discovery_info=None):
     """Set up Selve covers."""
 
     serial_port = config[CONF_PORT]
@@ -59,21 +60,18 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
 
-    i = 0
     devicelist = []
-    for id, device in selve.devices["device"].items():
-        devicelist[i] = SelveCover(selve.devices["device"][id], selve)
-        i = i + 1
-    for id, device in selve.devices["iveo"].items():
-        devicelist[i] = SelveCover(selve.devices["iveo"][id], selve)
-        i = i + 1
+    for id in selve.devices["device"]:
+        devicelist.append(SelveCover(selve.devices["device"][id], selve))
+
+    for id in selve.devices["iveo"]:
+        devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
     
     async_add_entities(devicelist, True)
 
-    selve.register_callback(hass.async_write_ha_state)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesCallback):
     config = hass.data[DOMAIN][config_entry.entry_id]
 
     serial_port = config[CONF_PORT]
@@ -93,7 +91,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     
     async_add_entities(devicelist, True)
     
-    selve.register_callback(hass.async_write_ha_state)
 
 
 class SelveCover(SelveDevice, CoverEntity):
@@ -105,6 +102,14 @@ class SelveCover(SelveDevice, CoverEntity):
     def __init__(self, device, controller) -> None:
         super().__init__(device, controller)
         self.selve_device.openState = None
+
+    async def async_added_to_hass(self) -> None:
+        """Run when this Entity has been added to HA."""
+        self.controller.register_callback(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Entity being removed from hass."""
+        self.controller.remove_callback(self.async_write_ha_state)
 
     async def async_update(self):
         """Update method."""

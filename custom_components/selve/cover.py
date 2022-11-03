@@ -74,7 +74,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     serial_port = config[CONF_PORT]
     try:
         selve = Selve(serial_port, False, logger = _LOGGER)
-        await selve.discover()
+        selve.discover()
     except PortError:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False

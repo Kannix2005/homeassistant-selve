@@ -16,10 +16,19 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_registry import (
     async_get_registry as async_get_entity_registry,
 )
-from selve import Gateway
+from selve import Selve
+from selve import SelveDevice as SD
+from selve import IveoDevice as ID
+
 
 REQUIREMENTS = ["python-selve-new"]
-PLATFORMS = ["cover"]#, "switch", "light", "climate"]
+PLATFORMS = ["cover"]  # , "switch", "light", "climate"]
+
+DS_BOOTLOADER = "Bootloader loading"
+DS_UPDATE = "Updating"
+DS_STARTUP = "Startup"
+DS_READY = "Ready"
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,9 +43,8 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry
-) -> bool:
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = entry.data
@@ -46,6 +54,7 @@ async def async_setup_entry(
         hass.config_entries.async_forward_entry_setup(entry, "cover")
     )
     return True
+
 
 async def async_setup(hass: HomeAssistant, config: dict):
     """Set up the Selve component."""
@@ -103,8 +112,8 @@ class SelveDevice(Entity):
 
     def __init__(self, selve_device, controller):
         """Initialize the device."""
-        self.selve_device = selve_device
-        self.controller = controller
+        self.selve_device: SD | ID = selve_device
+        self.controller: Selve = controller
         self._name = self.selve_device.name
 
     @callback
@@ -124,4 +133,4 @@ class SelveDevice(Entity):
     @property
     def device_state_attributes(self):
         """Return the state attributes of the device."""
-        return {"selve_device_id": self.selve_device.ID}
+        return {"selve_device_id": self.selve_device.id}

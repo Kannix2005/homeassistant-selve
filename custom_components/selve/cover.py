@@ -2,31 +2,19 @@
 Support for Selve cover - shutters etc.
 """
 from .const import DOMAIN
-from homeassistant.core import callback
 import logging
-from selve import Gateway
+from selve import Selve, PortError
 
 import voluptuous as vol
 
 from homeassistant.const import CONF_PORT
 from homeassistant.components.cover import (
+    CoverDeviceClass,
     CoverEntity,
     ATTR_POSITION,
-    ATTR_TILT_POSITION,
-    SUPPORT_OPEN,
-    SUPPORT_CLOSE,
-    SUPPORT_STOP,
-    SUPPORT_OPEN_TILT,
-    SUPPORT_CLOSE_TILT,
-    SUPPORT_STOP_TILT,
-    SUPPORT_SET_POSITION,
-    SUPPORT_SET_TILT_POSITION,
-    DEVICE_CLASS_WINDOW,
-    DEVICE_CLASS_BLIND,
-    DEVICE_CLASS_AWNING,
-    DEVICE_CLASS_SHUTTER,
+    CoverEntityFeature,
 )
-from . import DOMAIN as SELVE_DOMAIN, SelveDevice
+from . import SelveDevice
 
 from homeassistant.const import ATTR_ENTITY_ID
 import homeassistant.helpers.config_validation as cv
@@ -46,9 +34,9 @@ SELVE_SERVICE_SCHEMA = vol.Schema(
 
 SELVE_CLASSTYPES = {
     0: None,
-    1: DEVICE_CLASS_SHUTTER,
-    2: DEVICE_CLASS_BLIND,
-    3: DEVICE_CLASS_AWNING,
+    1: CoverDeviceClass.SHUTTER,
+    2: CoverDeviceClass.BLIND,
+    3: CoverDeviceClass.AWNING,
     4: "cover",
     5: "cover",
     6: "cover",
@@ -65,18 +53,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     serial_port = config[CONF_PORT]
     try:
-        selve = Gateway(serial_port, False)
-        await selve.discover()
-        devicesGW = list(selve.devices.values())
-    except:
+        selve = Selve(serial_port, False, hass.loop)
+        selve.discover()
+    except PortError:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
 
     devices = [
         SelveCover(device, selve)
-        for device in devicesGW
+        for device in (selve.devices["device"] + selve.devices["iveo"])
     ]
     async_add_entities(devices, True)
+
+    selve.register_callback(hass.async_write_ha_state)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -84,20 +73,23 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     serial_port = config[CONF_PORT]
     try:
-        selve = Gateway(serial_port, False)
+        selve = Selve(serial_port, False, hass.loop)
         await selve.discover()
-        devicesGW = list(selve.devices.values())
-    except:
+    except PortError:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         return False
     devices = [
         SelveCover(device, selve)
-        for device in devicesGW
+        for device in (selve.devices["device"] + selve.devices["iveo"])
     ]
     async_add_entities(devices, True)
 
+
 class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""
+
+    # Disable polling when using push
+    should_poll = False
 
     def __init__(self, device, controller) -> None:
         super().__init__(device, controller)
@@ -105,8 +97,11 @@ class SelveCover(SelveDevice, CoverEntity):
 
     async def async_update(self):
         """Update method."""
+
+        self.controller.state = self.controller.gatewayState()
+
         if self.isCommeo():
-            await self.selve_device.getDeviceValues()
+            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
             _LOGGER.debug("Value: " + str(self.selve_device.name))
             _LOGGER.debug("Value: " + str(self.selve_device.value))
 
@@ -115,28 +110,22 @@ class SelveCover(SelveDevice, CoverEntity):
 
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
-    
+
     @property
     def supported_features(self):
         """Flag supported features."""
         if self.isCommeo():
             return (
-                SUPPORT_OPEN
-                | SUPPORT_CLOSE
-                | SUPPORT_STOP
-                | SUPPORT_SET_POSITION
-                | SUPPORT_OPEN_TILT
-                | SUPPORT_CLOSE_TILT
-                | SUPPORT_SET_TILT_POSITION
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.STOP
+                | CoverEntityFeature.SET_POSITION
             )
         elif self.isIveo():
             return (
-                SUPPORT_OPEN
-                | SUPPORT_CLOSE
-                | SUPPORT_STOP
-                | SUPPORT_OPEN_TILT
-                | SUPPORT_CLOSE_TILT
-                | SUPPORT_SET_TILT_POSITION
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.STOP
             )
         else:
             return ()
@@ -172,13 +161,13 @@ class SelveCover(SelveDevice, CoverEntity):
     @property
     def is_opening(self):
         if self.isCommeo():
-            return self.selve_device.movementState.name == "UP_ON"
+            return self.selve_device.state.name == "UP_ON"
         return None
 
     @property
     def is_closing(self):
         if self.isCommeo():
-            return self.selve_device.movementState.name == "DOWN_ON"
+            return self.selve_device.state.name == "DOWN_ON"
         return None
 
     @property
@@ -188,57 +177,24 @@ class SelveCover(SelveDevice, CoverEntity):
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
-        await self.selve_device.moveUp()
-        if self.isIveo():
-            self.selve_device.openState = 100
+        self.controller.moveDeviceUp(self.selve_device)
         if self.isCommeo():
-            await self.selve_device.getDeviceValues()
-
-    async def async_open_cover_tilt(self, **kwargs):
-        """Open the cover."""
-        await self.selve_device.moveIntermediatePosition1()
-        
-        if self.isIveo():
-            self.selve_device.openState = 100
-        if self.isCommeo():
-            await self.selve_device.getDeviceValues()
+            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        await self.selve_device.moveDown()
-        
-        if self.isIveo():
-            self.selve_device.openState = 0
+        self.controller.moveDeviceDown(self.selve_device)
         if self.isCommeo():
-            await self.selve_device.getDeviceValues()
-
-    async def async_close_cover_tilt(self, **kwargs):
-        """Open the cover."""
-        await self.selve_device.moveIntermediatePosition2()
-        
-        if self.isIveo():
-            self.selve_device.openState = 0
+            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        await self.selve_device.stop()
-        
-        if self.isIveo():
-            self.selve_device.openState = 50
+        self.controller.stopDevice(self.selve_device)
         if self.isCommeo():
-            await self.selve_device.getDeviceValues()
-
-    async def async_stop_cover_tilt(self, **kwargs):
-        """Stop the cover."""
-        await self.selve_device.stop()
-        
-        if self.isIveo():
-            self.selve_device.openState = 50
-        if self.isCommeo():
-            await self.selve_device.getDeviceValues()
+            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         _position = 100 - kwargs.get(ATTR_POSITION)
-        await self.selve_device.driveToPos(_position)
-        await self.selve_device.getDeviceValues()
+        self.controller.moveDevicePos(_position)
+        self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)

@@ -81,10 +81,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     
     i = 0
     devicelist = {}
-    for device in selve.devices["device"]:
+    for device in selve.devices["device"].items():
         devicelist[i] = SelveCover(device, selve)
         i = i + 1
-    for device in selve.devices["iveo"]:
+    for device in selve.devices["iveo"].items():
         devicelist[i] = SelveCover(device, selve)
         i = i + 1
     

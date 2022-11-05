@@ -101,7 +101,10 @@ class SelveCover(SelveDevice, CoverEntity):
 
     def __init__(self, device, controller) -> None:
         super().__init__(device, controller)
-        self.selve_device.openState = None
+        self.selve_device.openState = 50
+        
+        if self.isCommeo():
+            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
@@ -152,8 +155,8 @@ class SelveCover(SelveDevice, CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        if self.isCommeo():
-            self.selve_device.openState = 100 - self.selve_device.value
+        #if self.isCommeo():
+        self.selve_device.openState = 100 - self.selve_device.value
 
         return self.selve_device.openState
 
@@ -163,8 +166,8 @@ class SelveCover(SelveDevice, CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open.
         """
-        if self.isCommeo():
-            self.selve_device.openState = 100 - self.selve_device.value
+        #if self.isCommeo():
+        self.selve_device.openState = 100 - self.selve_device.value
 
         return self.selve_device.openState
 
@@ -173,18 +176,15 @@ class SelveCover(SelveDevice, CoverEntity):
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
             return self.current_cover_position == 0
+        return None
 
     @property
     def is_opening(self):
-        if self.isCommeo():
-            return self.selve_device.state.name == "UP_ON"
-        return None
+        return self.selve_device.state.name == "UP_ON"
 
     @property
     def is_closing(self):
-        if self.isCommeo():
-            return self.selve_device.state.name == "DOWN_ON"
-        return None
+        return self.selve_device.state.name == "DOWN_ON"
 
     @property
     def device_class(self):

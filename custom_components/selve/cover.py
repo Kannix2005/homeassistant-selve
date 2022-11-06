@@ -117,7 +117,7 @@ class SelveCover(SelveDevice, CoverEntity):
 
         self.controller.state = self.controller.gatewayState()
 
-        self.controller.updateAllDevices()
+        #self.controller.updateAllDevices()
 
         if self.isCommeo():
             self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)

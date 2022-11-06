@@ -96,8 +96,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
 class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""
 
-    # Disable polling when using push
-    should_poll = False
 
     def __init__(self, device, controller) -> None:
         super().__init__(device, controller)
@@ -115,9 +113,11 @@ class SelveCover(SelveDevice, CoverEntity):
         self.controller.remove_callback(self.async_write_ha_state)
 
     async def async_update(self):
-        """Update method."""
+        """Update method. Not needed when using callbacks."""
 
         self.controller.state = self.controller.gatewayState()
+
+        self.controller.updateAllDevices()
 
         if self.isCommeo():
             self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
@@ -129,6 +129,12 @@ class SelveCover(SelveDevice, CoverEntity):
 
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
+
+
+    @property
+    def should_poll(self):
+        # Disable polling when using push
+        return False
 
     @property
     def supported_features(self):
@@ -156,9 +162,7 @@ class SelveCover(SelveDevice, CoverEntity):
         0 is closed, 100 is fully open.
         """
         #if self.isCommeo():
-        self.selve_device.openState = 100 - self.selve_device.value
-
-        return self.selve_device.openState
+        return 100 - self.selve_device.value
 
     @property
     def current_cover_tilt_position(self):
@@ -167,9 +171,7 @@ class SelveCover(SelveDevice, CoverEntity):
         0 is closed, 100 is fully open.
         """
         #if self.isCommeo():
-        self.selve_device.openState = 100 - self.selve_device.value
-
-        return self.selve_device.openState
+        return 100 - self.selve_device.value
 
     @property
     def is_closed(self):
@@ -190,27 +192,29 @@ class SelveCover(SelveDevice, CoverEntity):
     def device_class(self):
         """Return the class of the device."""
         return SELVE_CLASSTYPES.get(self.selve_device.device_type.value)
+    
+    @property
+    def extra_state_attributes(self):
+        return {
+            "value": self.selve_device.value,
+            "targetValue": self.selve_device.targetValue,
+            "communicationType": self.selve_device.communicationType.name,
+            "gatewayState": self.controller.state.name
+        }
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         self.controller.moveDeviceUp(self.selve_device)
-        if self.isCommeo():
-            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         self.controller.moveDeviceDown(self.selve_device)
-        if self.isCommeo():
-            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         self.controller.stopDevice(self.selve_device)
-        if self.isCommeo():
-            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        _position = 100 - kwargs.get(ATTR_POSITION)
-        self.controller.moveDevicePos(self.selve_device, _position)
-        self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
+        _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
+        self.controller.moveDevicePos(self.selve_device, _current_cover_position)

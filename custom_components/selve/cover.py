@@ -8,6 +8,7 @@ from selve import Selve, PortError
 import voluptuous as vol
 
 from homeassistant.const import CONF_PORT
+from homeassistant.exceptions import PlatformNotReady
 from homeassistant.components.cover import (
     CoverDeviceClass,
     CoverEntity,
@@ -56,9 +57,9 @@ async def async_setup_platform(hass, config, async_add_entities: AddEntitiesCall
     try:
         selve = Selve(serial_port, False, logger = _LOGGER)
         selve.discover()
-    except PortError:
+    except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
-        return False
+        raise PlatformNotReady(f"Connection error while connecting to {serial_port}: {ex}") from ex
 
     devicelist = []
     for id in selve.devices["device"]:
@@ -80,7 +81,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
         selve.discover()
     except PortError:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
-        return False
+        raise PlatformNotReady(f"Connection error while connecting to {serial_port}: {ex}") from ex
     
     devicelist = []
     for id in selve.devices["device"]:

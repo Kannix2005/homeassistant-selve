@@ -146,6 +146,9 @@ class SelveCover(SelveDevice, CoverEntity):
                 | CoverEntityFeature.CLOSE
                 | CoverEntityFeature.STOP
                 | CoverEntityFeature.SET_POSITION
+                | CoverEntityFeature.OPEN_TILT
+                | CoverEntityFeature.CLOSE_TILT
+                | CoverEntityFeature.STOP_TILT
             )
         elif self.isIveo():
             return (
@@ -206,12 +209,24 @@ class SelveCover(SelveDevice, CoverEntity):
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         self.controller.moveDeviceUp(self.selve_device)
+        
+    async def async_open_cover_tilt(self, **kwargs):
+        """Open the cover."""
+        self.controller.moveDeviceUp(self.selve_device)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         self.controller.moveDeviceDown(self.selve_device)
+        
+    async def async_close_cover_tilt(self, **kwargs):
+        """Close the cover."""
+        self.controller.moveDeviceDown(self.selve_device)
 
     async def async_stop_cover(self, **kwargs):
+        """Stop the cover."""
+        self.controller.stopDevice(self.selve_device)
+        
+    async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
         self.controller.stopDevice(self.selve_device)
 

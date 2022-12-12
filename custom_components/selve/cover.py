@@ -15,6 +15,10 @@ from homeassistant.components.cover import (
     ATTR_POSITION,
     CoverEntityFeature,
 )
+from homeassistant.components.cover import (
+    SwitchDeviceClass
+)
+
 from . import SelveDevice
 
 from homeassistant.const import ATTR_ENTITY_ID
@@ -39,14 +43,14 @@ SELVE_CLASSTYPES = {
     1: CoverDeviceClass.SHUTTER,
     2: CoverDeviceClass.BLIND,
     3: CoverDeviceClass.AWNING,
-    4: "cover",
-    5: "cover",
-    6: "cover",
-    7: "cover",
-    8: "cover",
-    9: "cover",
-    10: "cover",
-    11: "cover",
+    4: SwitchDeviceClass.SWITCH,
+    5: SwitchDeviceClass.SWITCH,
+    6: SwitchDeviceClass.SWITCH,
+    7: SwitchDeviceClass.SWITCH,
+    8: "climate",
+    9: "climate",
+    10: SwitchDeviceClass.SWITCH,
+    11: "gateway",
 }
 
 
@@ -159,6 +163,24 @@ class SelveCover(SelveDevice, CoverEntity):
         else:
             return ()
 
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        fwV = self.controller.getGatewayFirmwareVersion()
+        gId = self.controller.getGatewaySerial()
+        return DeviceInfo(
+            identifiers={
+                # Serial numbers are unique identifiers within a specific domain
+                (DOMAIN, self.unique_id)
+            },
+            name=self.name,
+            manufacturer="Selve",
+            model=self.selve_device.communicationType,
+            sw_version=fwV,
+            via_device=(DOMAIN, gId),
+        )
+
     @property
     def current_cover_position(self):
         """
@@ -195,7 +217,7 @@ class SelveCover(SelveDevice, CoverEntity):
     @property
     def device_class(self):
         """Return the class of the device."""
-        return SELVE_CLASSTYPES.get(self.selve_device.device_type.value)
+        return SELVE_CLASSTYPES.get(self.selve_device.device_sub_type.value)
     
     @property
     def extra_state_attributes(self):
@@ -212,7 +234,7 @@ class SelveCover(SelveDevice, CoverEntity):
         
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
-        self.controller.moveDeviceUp(self.selve_device)
+        self.controller.moveDevicePos1(self.selve_device)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
@@ -220,7 +242,7 @@ class SelveCover(SelveDevice, CoverEntity):
         
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""
-        self.controller.moveDeviceDown(self.selve_device)
+        self.controller.moveDevicePos2(self.selve_device)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""

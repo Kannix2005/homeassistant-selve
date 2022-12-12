@@ -15,6 +15,7 @@ from homeassistant.components.cover import (
     ATTR_POSITION,
     CoverEntityFeature,
 )
+from homeassistant.helpers.entity import DeviceInfo
 
 from . import SelveDevice
 

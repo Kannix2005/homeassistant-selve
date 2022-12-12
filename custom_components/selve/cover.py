@@ -15,9 +15,6 @@ from homeassistant.components.cover import (
     ATTR_POSITION,
     CoverEntityFeature,
 )
-from homeassistant.components.cover import (
-    SwitchDeviceClass
-)
 
 from . import SelveDevice
 
@@ -43,13 +40,13 @@ SELVE_CLASSTYPES = {
     1: CoverDeviceClass.SHUTTER,
     2: CoverDeviceClass.BLIND,
     3: CoverDeviceClass.AWNING,
-    4: SwitchDeviceClass.SWITCH,
-    5: SwitchDeviceClass.SWITCH,
-    6: SwitchDeviceClass.SWITCH,
-    7: SwitchDeviceClass.SWITCH,
+    4: "switch",
+    5: "switch",
+    6: "switch",
+    7: "switch",
     8: "climate",
     9: "climate",
-    10: SwitchDeviceClass.SWITCH,
+    10: "switch",
     11: "gateway",
 }
 

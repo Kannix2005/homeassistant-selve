@@ -5,7 +5,7 @@
     "issue_tracker": "https://github.com/Kannix2005/homeassistant-selve/issues",
     "dependencies": ["discovery"],
     "codeowners": ["@Kannix2005"],
-    "requirements": ["python-selve-new==2.0.23"],
+    "requirements": ["python-selve-new==2.0.24"],
     "version": "2.2.12",
     "iot_class": "local_polling",
     "config_flow": true

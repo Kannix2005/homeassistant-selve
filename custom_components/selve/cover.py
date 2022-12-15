@@ -165,7 +165,7 @@ class SelveCover(SelveDevice, CoverEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        fwV = 0 #self.controller.getGatewayFirmwareVersion()
+        fwV = self.controller.getGatewayFirmwareVersion()
         gId = self.controller.getGatewaySerial()
         return DeviceInfo(
             identifiers={

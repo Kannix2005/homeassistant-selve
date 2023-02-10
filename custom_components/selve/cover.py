@@ -52,8 +52,8 @@ SELVE_CLASSTYPES = {
 }
 
 
-async def async_setup_platform(hass, config, async_add_entities: AddEntitiesCallback, discovery_info=None):
-    """Set up Selve covers."""
+async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesCallback):
+    config = hass.data[DOMAIN][config_entry.entry_id]
 
     serial_port = config[CONF_PORT]
     try:
@@ -62,28 +62,6 @@ async def async_setup_platform(hass, config, async_add_entities: AddEntitiesCall
     except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         raise PlatformNotReady(f"Connection error while connecting to {serial_port}: {ex}") from ex
-
-    devicelist = []
-    for id in selve.devices["device"]:
-        devicelist.append(SelveCover(selve.devices["device"][id], selve))
-
-    for id in selve.devices["iveo"]:
-        devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
-    
-    async_add_entities(devicelist, True)
-
-
-
-async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesCallback):
-    config = hass.data[DOMAIN][config_entry.entry_id]
-
-    serial_port = config[CONF_PORT]
-    try:
-        selve = Selve(serial_port, False, logger = _LOGGER)
-        selve.discover()
-    except PortError:
-        _LOGGER.exception("Error when trying to connect to the selve gateway")
-        raise PlatformNotReady(f"Connection error while connecting to {serial_port}: {ex}") from ex
     
     devicelist = []
     for id in selve.devices["device"]:
@@ -91,6 +69,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
 
     for id in selve.devices["iveo"]:
         devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
+    
+    
+    new = {**config_entry.data}
+    new[CONF_PORT] = Selve._port
+    
+    hass.config_entries.async_update_entry(config_entry, data=new)
     
     async_add_entities(devicelist, True)
     

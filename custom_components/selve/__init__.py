@@ -51,6 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "cover")
     )
+    
     return True
 
 async def async_migrate_entry(hass, config_entry: ConfigEntry):

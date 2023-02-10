@@ -15,5 +15,16 @@
             "already_configured": "Device is already configured.",
             "unknown": "Unknown error."
         }
+    },
+    "options": {
+        "step": {
+          "init": {
+            "title": "Selve options",
+            "description": "",
+            "data": {
+              "switch_dir": "Reverse the current state value of covers (open is now 0%)"
+            }
+          }
+        }
     }
 }

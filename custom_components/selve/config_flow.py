@@ -27,6 +27,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def async_get_options_flow(config_entry):
+        return OptionsFlowHandler(config_entry)
+    
     async def async_step_user(self, user_input=None):
         """Give initial instructions for setup."""
 
@@ -54,6 +57,32 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "unknown"
 
         return self.async_show_form(step_id="user", errors=errors)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "switch_dir",
+                        default=self.config_entry.options.get("switch_dir", False),
+                    ): bool
+                }
+            ),
+        )
 
 
 class AlreadyConfigured(HomeAssistantError):

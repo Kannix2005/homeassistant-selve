@@ -3,6 +3,7 @@ Support for Selve cover - shutters etc.
 """
 from .const import DOMAIN
 import logging
+import asyncio
 from selve import Selve, PortError
 
 import voluptuous as vol
@@ -16,6 +17,7 @@ from homeassistant.components.cover import (
     CoverEntityFeature,
 )
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.config_entries import ConfigEntry
 
 from . import SelveDevice
 
@@ -58,6 +60,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     serial_port = config[CONF_PORT]
     try:
         selve = Selve(serial_port, False, logger = _LOGGER)
+        await asyncio.sleep(1)
+        selve.config = config_entry
         selve.discover()
     except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
@@ -76,9 +80,15 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     
     hass.config_entries.async_update_entry(config_entry, data=new)
     
+    config_entry.async_on_unload(config_entry.add_update_listener(update_listener))
+    
+    selve.config = new
+    
     async_add_entities(devicelist, True)
     
-
+async def update_listener(hass, config_entry):
+    """Handle options update."""
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
 class SelveCover(SelveDevice, CoverEntity):
     """Representation a Selve Cover."""
@@ -167,24 +177,36 @@ class SelveCover(SelveDevice, CoverEntity):
     def current_cover_position(self):
         """
         Return current position of cover.
-        0 is closed, 100 is fully open.
+        0 is closed, 100 is fully open. Can be reversed by options.
         """
         #if self.isCommeo():
+        
+        if self.controller.config.get("switch_dir"):
+            return self.selve_device.value
+        
         return 100 - self.selve_device.value
 
     @property
     def current_cover_tilt_position(self):
         """
         Return current position of cover.
-        0 is closed, 100 is fully open.
+        2 is closed, 98 is fully open. Can be reversed by options.
         """
         #if self.isCommeo():
-        return 100 - self.selve_device.value
+        value = 2 if self.selve_device.value < 2 else 98 if self.selve_device.value > 98 else self.selve_device.value
+        if self.controller.config.get("switch_dir"):
+            return value
+        
+        return 100 - value
 
     @property
     def is_closed(self):
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
+            
+            if self.controller.config.get("switch_dir"):
+                return self.current_cover_position == 100
+            
             return self.current_cover_position == 0
         return None
 
@@ -205,14 +227,20 @@ class SelveCover(SelveDevice, CoverEntity):
     def extra_state_attributes(self):
         return {
             "value": self.selve_device.value,
+            "tiltValue": self.current_cover_tilt_position,
             "targetValue": self.selve_device.targetValue,
             "communicationType": self.selve_device.communicationType.name,
-            "gatewayState": self.controller.state.name
+            "gatewayState": self.controller.state.name,
+            "Direction switch": self.controller.config.get("switch_dir")
         }
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
-        self.controller.moveDeviceUp(self.selve_device)
+        
+        if self.controller.config.get("switch_dir"):
+            self.controller.moveDeviceDown(self.selve_device)
+        else:
+            self.controller.moveDeviceUp(self.selve_device)
         
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
@@ -220,7 +248,10 @@ class SelveCover(SelveDevice, CoverEntity):
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        self.controller.moveDeviceDown(self.selve_device)
+        if self.controller.config.get("switch_dir"):
+            self.controller.moveDeviceUp(self.selve_device)
+        else:
+            self.controller.moveDeviceDown(self.selve_device)
         
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""
@@ -236,5 +267,10 @@ class SelveCover(SelveDevice, CoverEntity):
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-        self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+        
+        if self.controller.config.get("switch_dir"):
+            _current_cover_position = kwargs.get(ATTR_POSITION)
+            self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+        else:
+            _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
+            self.controller.moveDevicePos(self.selve_device, _current_cover_position)

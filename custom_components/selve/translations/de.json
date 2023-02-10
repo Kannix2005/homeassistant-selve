@@ -15,5 +15,16 @@
             "already_configured": "Gateway ist bereits konfiguriert.",
             "unknown": "Unbekannter Fehler."
         }
+    },
+    "options": {
+        "step": {
+          "init": {
+            "title": "Selve Einstellungen",
+            "description": "",
+            "data": {
+              "switch_dir": "Zustandswert der Abdeckungen umkehren (Offen ist jetzt 0%)"
+            }
+          }
+        }
     }
 }

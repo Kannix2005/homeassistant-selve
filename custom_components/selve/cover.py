@@ -72,7 +72,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     
     
     new = {**config_entry.data}
-    new[CONF_PORT] = Selve._port
+    new[CONF_PORT] = selve._port
     
     hass.config_entries.async_update_entry(config_entry, data=new)
     

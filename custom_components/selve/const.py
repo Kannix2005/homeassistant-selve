@@ -1,6 +1,7 @@
 """Constants for the selvetest integration."""
 
 DOMAIN = "selve"
+
 SELVE_TYPES = {
     0: None,
     1: "cover",

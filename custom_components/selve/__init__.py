@@ -6,7 +6,7 @@ from __future__ import annotations
 from homeassistant.components import discovery
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from .const import DOMAIN, SELVE_TYPES
+from .const import DOMAIN
 from collections import defaultdict
 import logging
 import voluptuous as vol
@@ -17,8 +17,6 @@ from homeassistant.helpers.entity_registry import (
     async_get_registry as async_get_entity_registry,
 )
 from selve import Selve
-from selve import SelveDevice as SD
-from selve import IveoDevice as ID
 
 
 REQUIREMENTS = ["python-selve-new"]
@@ -64,11 +62,6 @@ async def async_setup(hass: HomeAssistant, config: dict):
     hass.data.setdefault(DOMAIN, {})
 
     return True
-
-
-def map_selve_device(selve_device):
-    """Map Selve device types to Home Assistant components."""
-    return SELVE_TYPES.get(selve_device.device_type.value)
 
 
 class SelveDevice(Entity):

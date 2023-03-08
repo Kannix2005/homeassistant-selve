@@ -181,8 +181,8 @@ class SelveCover(SelveDevice, CoverEntity):
         """
         #if self.isCommeo():
         
-        if self.controller.config.get("switch_dir"):
-            return self.selve_device.value
+        #if self.controller.config.get("switch_dir"):
+        #     return self.selve_device.value
         
         return 100 - self.selve_device.value
 
@@ -194,8 +194,8 @@ class SelveCover(SelveDevice, CoverEntity):
         """
         #if self.isCommeo():
         value = 2 if self.selve_device.value < 2 else 98 if self.selve_device.value > 98 else self.selve_device.value
-        if self.controller.config.get("switch_dir"):
-            return value
+        #if self.controller.config.get("switch_dir"):
+        #    return value
         
         return 100 - value
 
@@ -204,8 +204,8 @@ class SelveCover(SelveDevice, CoverEntity):
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
             
-            if self.controller.config.get("switch_dir"):
-                return self.current_cover_position == 100
+        #    if self.controller.config.get("switch_dir"):
+        #        return self.current_cover_position == 100
             
             return self.current_cover_position == 0
         return None

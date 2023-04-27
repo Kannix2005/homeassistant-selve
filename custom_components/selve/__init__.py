@@ -13,9 +13,6 @@ import voluptuous as vol
 from homeassistant.const import CONF_PORT
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_registry import (
-    async_get_registry as async_get_entity_registry,
-)
 from selve import Selve
 
 

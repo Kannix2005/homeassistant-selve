@@ -162,8 +162,8 @@ class SelveCover(SelveDevice, CoverEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        fwV = self.controller.getGatewayFirmwareVersion()
-        gId = self.controller.getGatewaySerial()
+        #fwV = self.controller.getGatewayFirmwareVersion()
+        #gId = self.controller.getGatewaySerial()
         return DeviceInfo(
             identifiers={
                 # Serial numbers are unique identifiers within a specific domain
@@ -172,8 +172,8 @@ class SelveCover(SelveDevice, CoverEntity):
             name=self.name,
             manufacturer="Selve",
             model=self.selve_device.communicationType,
-            sw_version=fwV,
-            via_device=(DOMAIN, gId),
+            sw_version=1,
+            via_device=(DOMAIN, 1),
         )
 
     @property

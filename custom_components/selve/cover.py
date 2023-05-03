@@ -228,12 +228,21 @@ class SelveCover(SelveDevice, CoverEntity):
     
     @property
     def extra_state_attributes(self):
+
+        gatewayState = ""
+
+        self.controller.gatewayState()
+
+        if self.controller.state:
+            if self.controller.state.name:
+                gatewayState = self.controller.state.name
+
         return {
             "value": self.selve_device.value,
             "tiltValue": self.current_cover_tilt_position,
             "targetValue": self.selve_device.targetValue,
             "communicationType": self.selve_device.communicationType.name if self.selve_device.communicationType.name else "",
-            "gatewayState": self.controller.state.name if self.controller.state.name else "",
+            "gatewayState": gatewayState,
             "Direction switch": self.controller.config.get("switch_dir")
         }
 

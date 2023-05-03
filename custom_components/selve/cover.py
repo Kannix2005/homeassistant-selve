@@ -73,6 +73,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
 
     for id in selve.devices["iveo"]:
         devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
+        
+    for id in selve.devices["group"]:
+        devicelist.append(SelveCover(selve.devices["group"][id], selve))
     
     
     new = {**config_entry.data}
@@ -229,8 +232,8 @@ class SelveCover(SelveDevice, CoverEntity):
             "value": self.selve_device.value,
             "tiltValue": self.current_cover_tilt_position,
             "targetValue": self.selve_device.targetValue,
-            "communicationType": self.selve_device.communicationType.name,
-            "gatewayState": self.controller.state.name,
+            "communicationType": self.selve_device.communicationType.name if self.selve_device.communicationType.name else "",
+            "gatewayState": self.controller.state.name if self.controller.state.name else "",
             "Direction switch": self.controller.config.get("switch_dir")
         }
 

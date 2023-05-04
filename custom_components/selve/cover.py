@@ -60,7 +60,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     serial_port = config[CONF_PORT]
     try:
         selve = Selve(serial_port, False, logger = _LOGGER)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         selve.config = config_entry
         selve.discover()
     except PortError as ex:
@@ -74,8 +74,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     for id in selve.devices["iveo"]:
         devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
         
-    for id in selve.devices["group"]:
-        devicelist.append(SelveCover(selve.devices["group"][id], selve))
+    #for id in selve.devices["group"]:
+    #    devicelist.append(SelveCover(selve.devices["group"][id], selve))
     
     
     new = {**config_entry.data}
@@ -115,7 +115,7 @@ class SelveCover(SelveDevice, CoverEntity):
     async def async_update(self):
         """Update method. Not needed when using callbacks."""
 
-        self.controller.state = self.controller.gatewayState()
+        #self.controller.state = self.controller.gatewayState()
 
         #self.controller.updateAllDevices()
 
@@ -231,11 +231,11 @@ class SelveCover(SelveDevice, CoverEntity):
 
         gatewayState = ""
 
-        self.controller.gatewayState()
+        #self.controller.gatewayState()
 
-        if self.controller.state:
-            if self.controller.state.name:
-                gatewayState = self.controller.state.name
+        #if self.controller.state:
+        #    if self.controller.state.name:
+        #        gatewayState = self.controller.state.name
 
         return {
             "value": self.selve_device.value,

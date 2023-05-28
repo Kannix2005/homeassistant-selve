@@ -102,13 +102,13 @@ class SelveSensor(BinarySensorEntity):
         return DeviceInfo(
             identifiers={
                 # Serial numbers are unique identifiers within a specific domain
-                (DOMAIN, self.unique_id)
+                (DOMAIN, str(self.selve_device.device_type.value) + str(self.selve_device.id))
             },
             name=self.name,
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, str(self.selve_device.device_type.value) + str(self.selve_device.id)),
+            via_device=(DOMAIN, self.controller._port),
         )
 
     @property

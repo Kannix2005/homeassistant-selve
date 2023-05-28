@@ -53,19 +53,13 @@ SELVE_CLASSTYPES = {
     11: "gateway",
 }
 
-
-async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesCallback):
-    config = hass.data[DOMAIN][config_entry.entry_id]
-
-    serial_port = config[CONF_PORT]
+def setup_platform(hass, config, add_devices, discovery_info=None):
+    selve: Selve = hass.data[DOMAIN][config.get(CONF_PORT)].controller
     try:
-        selve = Selve(serial_port, False, logger = _LOGGER)
-        await asyncio.sleep(0.1)
-        selve.config = config_entry
         selve.discover()
     except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
-        raise PlatformNotReady(f"Connection error while connecting to {serial_port}: {ex}") from ex
+        raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
     
     devicelist = []
     for id in selve.devices["device"]:
@@ -74,35 +68,43 @@ async def async_setup_entry(hass, config_entry, async_add_entities: AddEntitiesC
     for id in selve.devices["iveo"]:
         devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
         
-    #for id in selve.devices["group"]:
-    #    devicelist.append(SelveCover(selve.devices["group"][id], selve))
-    
-    
-    new = {**config_entry.data}
-    new[CONF_PORT] = selve._port
-    
-    hass.config_entries.async_update_entry(config_entry, data=new)
-    
-    config_entry.async_on_unload(config_entry.add_update_listener(update_listener))
-    
-    selve.config = new
-    
-    async_add_entities(devicelist, True)
-    
+    for id in selve.devices["group"]:
+        devicelist.append(SelveCover(selve.devices["group"][id], selve))
+        
+    add_devices(devicelist, True)
+
 async def update_listener(hass, config_entry):
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
 
-class SelveCover(SelveDevice, CoverEntity):
+
+class SelveCover(CoverEntity):
     """Representation a Selve Cover."""
 
-
     def __init__(self, device, controller) -> None:
-        super().__init__(device, controller)
+        self.selve_device = device
         self.selve_device.openState = 50
-        
-        if self.isCommeo():
+        self.controller = controller
+        self._name = str(self.selve_device.name)
+
+        if self.isCommeo:
             self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
+
+    @property
+    def unique_id(self):
+        """Return the unique id base on the id returned by gateway."""
+        return str(self.selve_device.device_type.value) + str(self.selve_device.id)
+
+    @property
+    def name(self):
+        """Return the name of the device."""
+        return self._name
+
+    @property
+    def device_state_attributes(self):
+        """Return the state attributes of the device."""
+        return {"selve_device_id": self.selve_device.id}
+
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
@@ -119,14 +121,16 @@ class SelveCover(SelveDevice, CoverEntity):
 
         #self.controller.updateAllDevices()
 
-        if self.isCommeo():
+        if self.isCommeo:
             self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
             _LOGGER.debug("Value: " + str(self.selve_device.name))
             _LOGGER.debug("Value: " + str(self.selve_device.value))
 
+    @property
     def isCommeo(self):
         return self.selve_device.communicationType.name == "COMMEO"
 
+    @property
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
 
@@ -154,6 +158,7 @@ class SelveCover(SelveDevice, CoverEntity):
                 CoverEntityFeature.OPEN
                 | CoverEntityFeature.CLOSE
                 | CoverEntityFeature.STOP
+                | CoverEntityFeature.SET_POSITION
             )
         else:
             return ()
@@ -173,7 +178,7 @@ class SelveCover(SelveDevice, CoverEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, 1),
+            via_device=(DOMAIN, self.controller._port),
         )
 
     @property
@@ -280,9 +285,15 @@ class SelveCover(SelveDevice, CoverEntity):
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         
-        if self.controller.config.get("switch_dir"):
-            _current_cover_position = kwargs.get(ATTR_POSITION)
-            self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+        if self.isCommeo:
+            if self.controller.config.get("switch_dir"):
+                _current_cover_position = kwargs.get(ATTR_POSITION)
+                self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+            else:
+                _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
+                self.controller.moveDevicePos(self.selve_device, _current_cover_position)
         else:
-            _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-            self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+            if kwargs.get(ATTR_POSITION) >= 50:
+                self.controller.moveDevicePos1(self.selve_device)
+            else:
+                self.controller.moveDevicePos2(self.selve_device)

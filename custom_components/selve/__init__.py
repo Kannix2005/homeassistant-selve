@@ -3,6 +3,7 @@ Support for Selve devices.
 """
 
 from __future__ import annotations
+import asyncio
 from homeassistant.components import discovery
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -13,7 +14,8 @@ import voluptuous as vol
 from homeassistant.const import CONF_PORT
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
-from selve import Selve
+from homeassistant.exceptions import PlatformNotReady
+from selve import Selve, PortError
 
 
 REQUIREMENTS = ["python-selve-new"]
@@ -39,17 +41,35 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up platform from a ConfigEntry."""
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = entry.data
+async def async_setup(hass: HomeAssistant, config: dict):
+    """Set up the Selve component."""
 
-    # Forward the setup to the cover platform.
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "cover")
-    )
-    
+    conf = config.get(DOMAIN)
+    if conf is None:
+        conf = {}
+
+    hass.data[DOMAIN] = {}
+
     return True
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities) -> bool:
+    """Set up platform from a ConfigEntry."""
+
+
+    port = entry.data[CONF_PORT]
+    config = hass.data[DOMAIN].get(port)
+
+    selvegat = SelveGateway(hass, entry)
+    hass.data[DOMAIN][port] = selvegat
+    
+    return await selvegat.async_setup()
+
+
+async def async_unload_entry(hass, entry):
+    """Unload a config entry."""
+    controller = hass.data[DOMAIN].pop(entry.data[CONF_PORT])
+    return await controller.async_reset()
+
 
 async def async_migrate_entry(hass, config_entry: ConfigEntry):
     """Migrate old entry."""
@@ -66,14 +86,54 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     return True
 
-async def async_setup(hass: HomeAssistant, config: dict):
-    """Set up the Selve component."""
-    # Ensure our name space for storing objects is a known type. A dict is
-    # common/preferred as it allows a separate instance of your class for each
-    # instance that has been created in the UI.
-    hass.data.setdefault(DOMAIN, {})
 
-    return True
+class SelveGateway(object):
+    """Manages a single selve gateway."""
+
+    def __init__(self, hass, config_entry):
+        """Initialize the system."""
+        self.config_entry = config_entry
+        self.hass = hass
+        self.available = True
+        self.port = None
+        self.controller = None
+
+    @property
+    def port(self):
+        """Return the host of this bridge."""
+        return self.config_entry.data[CONF_PORT]
+
+    async def async_setup(self):
+        port = self.port
+        hass = self.hass
+
+        try:
+            self.controller = Selve(port=port, discover=False, logger = _LOGGER)
+        except PortError as ex:
+            _LOGGER.exception("Error when trying to connect to the selve gateway")
+            return False
+        
+        hass.async_add_job(hass.config_entries.async_forward_entry_setup(
+            self.config_entry, 'cover'))
+        
+        hass.async_add_job(hass.config_entries.async_forward_entry_setup(
+            self.config_entry, 'sensor'))
+
+        return True
+
+
+    async def async_reset(self):
+        if self.port is None:
+            return True
+        
+        if self.controller is None:
+            return True
+
+        await self.hass.config_entries.async_forward_entry_unload(
+            self.config_entry, 'cover')
+    
+        return await self.hass.config_entries.async_forward_entry_unload(
+            self.config_entry, 'sensor')
 
 
 class SelveDevice(Entity):
@@ -82,7 +142,6 @@ class SelveDevice(Entity):
     def __init__(self, selve_device, controller):
         """Initialize the device."""
         self.selve_device = selve_device
-        self.controller: Selve = controller
         self._name = str(self.selve_device.name)
 
     @callback

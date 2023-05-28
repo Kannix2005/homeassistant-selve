@@ -95,20 +95,20 @@ class SelveSensor(BinarySensorEntity):
         self._state = None
 
     
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return the device info."""
-        return DeviceInfo(
-            identifiers={
-                # Serial numbers are unique identifiers within a specific domain
-                (DOMAIN, self.unique_id)
-            },
-            name=self.name,
-            manufacturer="Selve",
-            model=self.selve_device.communicationType,
-            sw_version=1,
-            via_device=(DOMAIN, self.unique_id),
-        )
+    # @property
+    # def device_info(self) -> DeviceInfo:
+    #     """Return the device info."""
+    #     return DeviceInfo(
+    #         identifiers={
+    #             # Serial numbers are unique identifiers within a specific domain
+    #             (DOMAIN, self.unique_id)
+    #         },
+    #         name=self.name,
+    #         manufacturer="Selve",
+    #         model=self.selve_device.communicationType,
+    #         sw_version=1,
+    #         via_device=(DOMAIN, self.unique_id),
+    #     )
 
     @property
     def should_poll(self) -> bool:
@@ -140,7 +140,9 @@ class SelveSensor(BinarySensorEntity):
         The return type of this call depends on the attribute that
         is configured.
         """
-        return getattr(self.selve_device, self.description.key, None)
+        attr = getattr(self.selve_device, self.description.key, None)
+
+        return False if attr or attr is None else True
 
     @property
     def device_class(self):

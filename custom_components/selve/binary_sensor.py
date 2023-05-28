@@ -67,8 +67,8 @@ BINARY_SENSORS_TYPES: tuple[BinarySensorEntityDescription, ...] = (
 )
 
 
-def async_setup_platform(hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
-    selve: Selve = hass.data[DOMAIN][config.get(CONF_PORT)].controller
+def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
+    selve: Selve = hass.data[DOMAIN][config_entry.get(CONF_PORT)].controller
     try:
         #gateway should already be discovered by cover platform, just ping to make sure
         selve.pingGateway()

@@ -9,6 +9,7 @@ from selve import Selve, PortError
 import voluptuous as vol
 
 from homeassistant.const import CONF_PORT
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.components.cover import (
     CoverDeviceClass,
@@ -53,8 +54,8 @@ SELVE_CLASSTYPES = {
     11: "gateway",
 }
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
-    selve: Selve = hass.data[DOMAIN][config.get(CONF_PORT)].controller
+def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
+    selve: Selve = hass.data[DOMAIN][config_entry.get(CONF_PORT)].controller
     try:
         selve.discover()
     except PortError as ex:
@@ -71,7 +72,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     for id in selve.devices["group"]:
         devicelist.append(SelveCover(selve.devices["group"][id], selve))
         
-    add_devices(devicelist, True)
+    async_add_entities(devicelist, True)
 
 async def update_listener(hass, config_entry):
     """Handle options update."""

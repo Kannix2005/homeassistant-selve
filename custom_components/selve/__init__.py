@@ -55,7 +55,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
 
-    port = entry.data[CONF_PORT]
+    port = entry.data[CONF_PORT] if entry.data[CONF_PORT] is not None else "1"
 
     selvegat = SelveGateway(hass, entry)
     hass.data[DOMAIN][port] = selvegat
@@ -133,7 +133,7 @@ class SelveGateway(object):
             self.config_entry, 'cover')
     
         return await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, 'sensor')
+            self.config_entry, 'binary_sensor')
 
 
 class SelveDevice(Entity):

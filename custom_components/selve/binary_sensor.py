@@ -79,8 +79,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     # Sensors can only be available for commeo devices, due to lack of return channel on iveo
     for id in selve.devices["device"]:
         for description in BINARY_SENSORS_TYPES:
-            devicelist.append(SelveSensor(selve.devices["device"][id], selve, description))
-        
+            try:
+                devicelist.append(SelveSensor(selve.devices["device"][id], selve, description))
+            except Exception as e:
+                pass
     async_add_entities(devicelist, True)
 
 class SelveSensor(BinarySensorEntity):

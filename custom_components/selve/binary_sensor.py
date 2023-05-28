@@ -70,8 +70,7 @@ BINARY_SENSORS_TYPES: tuple[BinarySensorEntityDescription, ...] = (
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
     selve: Selve = hass.data[DOMAIN][config_entry.data[CONF_PORT]].controller
     try:
-        #gateway should already be discovered by cover platform, just ping to make sure
-        selve.pingGateway()
+        selve.pingGateway() #gateway should already be discovered by cover platform, just ping to make sure
     except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
@@ -107,7 +106,7 @@ class SelveSensor(BinarySensorEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, self.unique_id_cover),
+            via_device=(DOMAIN, str(self.selve_device.device_type.value) + str(self.selve_device.id)),
         )
 
     @property
@@ -119,11 +118,6 @@ class SelveSensor(BinarySensorEntity):
     def unique_id(self):
         """Return the unique id base on the id returned by gateway."""
         return str(self.selve_device.device_type.value) + str(self.selve_device.id) + self.description.key
-
-    @property
-    def unique_id_cover(self):
-        """Return the unique id base on the id returned by gateway."""
-        return str(self.selve_device.device_type.value) + str(self.selve_device.id)
 
     @property
     def name(self):

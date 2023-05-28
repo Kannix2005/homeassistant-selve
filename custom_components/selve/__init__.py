@@ -94,14 +94,16 @@ class SelveGateway(object):
         """Initialize the system."""
         self.config_entry = config_entry
         self.hass = hass
-        self.available = True
-        self.port = None
         self.controller = None
 
     @property
     def port(self):
         """Return the host of this bridge."""
         return self.config_entry.data[CONF_PORT]
+
+    @property
+    def available(self):
+        return self.controller.pingGateway()
 
     async def async_setup(self):
         port = self.port

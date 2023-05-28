@@ -55,7 +55,7 @@ SELVE_CLASSTYPES = {
 }
 
 def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
-    selve: Selve = hass.data[DOMAIN][config_entry.get(CONF_PORT)].controller
+    selve: Selve = hass.data[DOMAIN][config_entry.data[CONF_PORT]].controller
     try:
         selve.discover()
     except PortError as ex:

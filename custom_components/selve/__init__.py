@@ -55,9 +55,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
 
-
     port = entry.data[CONF_PORT]
-    config = hass.data[DOMAIN].get(port)
 
     selvegat = SelveGateway(hass, entry)
     hass.data[DOMAIN][port] = selvegat

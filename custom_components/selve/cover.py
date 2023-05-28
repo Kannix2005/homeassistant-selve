@@ -144,7 +144,7 @@ class SelveCover(CoverEntity):
     @property
     def supported_features(self):
         """Flag supported features."""
-        if self.isCommeo():
+        if self.isCommeo:
             return (
                 CoverEntityFeature.OPEN
                 | CoverEntityFeature.CLOSE
@@ -154,7 +154,7 @@ class SelveCover(CoverEntity):
                 | CoverEntityFeature.CLOSE_TILT
                 | CoverEntityFeature.STOP_TILT
             )
-        elif self.isIveo():
+        elif self.isIveo:
             return (
                 CoverEntityFeature.OPEN
                 | CoverEntityFeature.CLOSE
@@ -188,7 +188,7 @@ class SelveCover(CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open. Can be reversed by options.
         """
-        #if self.isCommeo():
+        #if self.isCommeo:
         
         #if self.controller.config.get("switch_dir"):
         #     return self.selve_device.value
@@ -201,7 +201,7 @@ class SelveCover(CoverEntity):
         Return current position of cover.
         2 is closed, 98 is fully open. Can be reversed by options.
         """
-        #if self.isCommeo():
+        #if self.isCommeo:
         value = 2 if self.selve_device.value < 2 else 98 if self.selve_device.value > 98 else self.selve_device.value
         #if self.controller.config.get("switch_dir"):
         #    return value

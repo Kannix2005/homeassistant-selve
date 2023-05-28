@@ -237,19 +237,22 @@ class SelveCover(CoverEntity):
 
         gatewayState = ""
 
-        #self.controller.gatewayState()
+        try:
+            self.controller.gatewayState()
 
-        #if self.controller.state:
-        #    if self.controller.state.name:
-        #        gatewayState = self.controller.state.name
+        except Exception as e:
+            _LOGGER.exception(f"Error when trying to get the gateway state:  {e}")
+
+        if self.controller.state:
+            if self.controller.state.name:
+                gatewayState = self.controller.state.name
 
         return {
             "value": self.selve_device.value,
             "tiltValue": self.current_cover_tilt_position,
             "targetValue": self.selve_device.targetValue,
             "communicationType": self.selve_device.communicationType.name if self.selve_device.communicationType.name else "",
-            "gatewayState": gatewayState,
-            "Direction switch": self.controller.config.get("switch_dir")
+            "gatewayState": gatewayState
         }
 
     async def async_open_cover(self, **kwargs):

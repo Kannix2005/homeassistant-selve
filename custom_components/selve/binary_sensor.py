@@ -107,7 +107,7 @@ class SelveSensor(BinarySensorEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, str(self.selve_device.device_type.value) + str(self.selve_device.id)),
+            via_device=(DOMAIN, self.unique_id),
         )
 
     @property
@@ -118,7 +118,7 @@ class SelveSensor(BinarySensorEntity):
     @property
     def unique_id(self):
         """Return the unique id base on the id returned by gateway."""
-        return str(self.selve_device.device_type.value) + str(self.selve_device.id) + self.description.key
+        return str(self.selve_device.device_type.value) + str(self.selve_device.id) #+ self.description.key
 
     @property
     def name(self):

@@ -52,7 +52,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
     return True
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
 
 

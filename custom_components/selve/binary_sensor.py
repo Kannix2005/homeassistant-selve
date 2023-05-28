@@ -104,11 +104,11 @@ class SelveSensor(BinarySensorEntity):
                 # Serial numbers are unique identifiers within a specific domain
                 (DOMAIN, str(self.selve_device.device_type.value) + str(self.selve_device.id))
             },
-            name=self.name,
+            name=str(self.selve_device.name),
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, self.controller._port),
+            via_device=(DOMAIN, self.controller._port)
         )
 
     @property

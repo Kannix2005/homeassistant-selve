@@ -237,15 +237,15 @@ class SelveCover(CoverEntity):
 
         gatewayState = ""
 
-        try:
-            self.controller.gatewayState()
+        # try:
+        #     self.controller.gatewayState()
 
-        except Exception as e:
-            _LOGGER.exception(f"Error when trying to get the gateway state:  {e}")
+        # except Exception as e:
+        #     _LOGGER.exception(f"Error when trying to get the gateway state:  {e}")
 
-        if self.controller.state:
-            if self.controller.state.name:
-                gatewayState = self.controller.state.name
+        # if self.controller.state:
+        #     if self.controller.state.name:
+        #         gatewayState = self.controller.state.name
 
         return {
             "value": self.selve_device.value,

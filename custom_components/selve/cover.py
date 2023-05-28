@@ -290,12 +290,8 @@ class SelveCover(CoverEntity):
         """Move the cover to a specific position."""
         
         if self.isCommeo:
-            if self.controller.config.get("switch_dir"):
-                _current_cover_position = kwargs.get(ATTR_POSITION)
-                self.controller.moveDevicePos(self.selve_device, _current_cover_position)
-            else:
-                _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-                self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+            _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
+            self.controller.moveDevicePos(self.selve_device, _current_cover_position)
         else:
             if kwargs.get(ATTR_POSITION) >= 50:
                 self.controller.moveDevicePos1(self.selve_device)

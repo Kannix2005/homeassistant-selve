@@ -269,10 +269,7 @@ class SelveCover(CoverEntity):
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        if self.controller.config.get("switch_dir"):
-            self.controller.moveDeviceUp(self.selve_device)
-        else:
-            self.controller.moveDeviceDown(self.selve_device)
+        self.controller.moveDeviceDown(self.selve_device)
         
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""

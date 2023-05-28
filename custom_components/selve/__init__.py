@@ -119,7 +119,7 @@ class SelveGateway(object):
             self.config_entry, 'cover'))
         
         hass.async_add_job(hass.config_entries.async_forward_entry_setup(
-            self.config_entry, 'sensor'))
+            self.config_entry, 'binary_sensor'))
 
         return True
 

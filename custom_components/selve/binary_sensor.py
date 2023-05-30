@@ -69,11 +69,11 @@ BINARY_SENSORS_TYPES: tuple[BinarySensorEntityDescription, ...] = (
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
     selve: Selve = hass.data[DOMAIN][config_entry.data[CONF_PORT]].controller
-    try:
-        selve.pingGateway() #gateway should already be discovered by cover platform, just ping to make sure
-    except PortError as ex:
-        _LOGGER.exception("Error when trying to connect to the selve gateway")
-        raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
+    # try:
+    #     selve.pingGateway() #gateway should already be discovered by cover platform, just ping to make sure
+    # except PortError as ex:
+    #     _LOGGER.exception("Error when trying to connect to the selve gateway")
+    #     raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
     
     devicelist = []
     # Sensors can only be available for commeo devices, due to lack of return channel on iveo

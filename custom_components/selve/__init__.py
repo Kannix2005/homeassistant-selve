@@ -109,6 +109,7 @@ class SelveGateway(object):
 
         try:
             self.controller = Selve(port=port, discover=False, logger = _LOGGER)
+            self.controller.setEvents(True, True, True, True, True) # activate events to enable values to be reported back
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway")
             return False
@@ -129,11 +130,14 @@ class SelveGateway(object):
         if self.controller is None:
             return True
 
+        self.controller.stopGateway()
+
         await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, 'cover')
     
-        return await self.hass.config_entries.async_forward_entry_unload(
+        await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, 'binary_sensor')
+    
 
 
 class SelveDevice(Entity):

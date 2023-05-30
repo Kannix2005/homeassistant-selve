@@ -140,10 +140,9 @@ class SelveSensor(BinarySensorEntity):
 
         The return type of this call depends on the attribute that
         is configured.
-        """
+        """      
         attr = getattr(self.selve_device, self.description.key, None)
-
-        return False if attr or attr is None else True
+        return attr
 
     @property
     def device_class(self):

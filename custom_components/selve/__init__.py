@@ -113,7 +113,7 @@ class SelveGateway(object):
                 self.controller.resetGateway()
                 while self.controller.gatewayReady() is not True:
                     asyncio.sleep(1)
-            self.controller.setEvents(1, 1, 1, 1, 1) # activate events to enable values to be reported back
+            self.controller.setEvents(0, 0, 0, 0, 0) #deactivate events for discovery
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway")
             return False
@@ -124,6 +124,7 @@ class SelveGateway(object):
         hass.async_add_job(hass.config_entries.async_forward_entry_setup(
             self.config_entry, 'binary_sensor'))
 
+        self.controller.setEvents(1, 1, 1, 1, 1) #activate events to enable values to be reported back
         return True
 
 

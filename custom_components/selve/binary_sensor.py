@@ -142,7 +142,7 @@ class SelveSensor(BinarySensorEntity):
         is configured.
         """      
         attr = getattr(self.selve_device, self.description.key, None)
-        _LOGGER.debug("Attr " + self.description.key + " : " + attr)
+        _LOGGER.debug("Attr " + str(self.description.key) + " : " + str(attr))
         return attr
 
     @property

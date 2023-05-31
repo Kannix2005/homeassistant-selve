@@ -124,8 +124,6 @@ class SelveCover(CoverEntity):
 
         if self.isCommeo:
             self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
-            _LOGGER.debug("Value: " + str(self.selve_device.name))
-            _LOGGER.debug("Value: " + str(self.selve_device.value))
 
     @property
     def isCommeo(self):

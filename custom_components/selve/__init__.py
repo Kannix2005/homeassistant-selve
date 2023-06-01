@@ -109,11 +109,12 @@ class SelveGateway(object):
 
         try:
             self.controller = Selve(port=port, discover=False, logger = _LOGGER)
-            if self.controller.gatewayReady() is not True:
-                self.controller.resetGateway()
-                while self.controller.gatewayReady() is not True:
+            await self.controller.setup(discover=False, fromConfigFlow=False)
+            if await self.controller.gatewayReady() is not True:
+                await self.controller.resetGateway()
+                while await self.controller.gatewayReady() is not True:
                     asyncio.sleep(1)
-            self.controller.setEvents(0, 0, 0, 0, 0) #deactivate events for discovery
+            await self.controller.setEvents(0, 0, 0, 0, 0) #deactivate events for discovery
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway")
             return False
@@ -124,7 +125,7 @@ class SelveGateway(object):
         hass.async_add_job(hass.config_entries.async_forward_entry_setup(
             self.config_entry, 'binary_sensor'))
 
-        self.controller.setEvents(1, 1, 1, 1, 1) #activate events to enable values to be reported back
+        await self.controller.setEvents(1, 1, 1, 1, 1) #activate events to enable values to be reported back
         return True
 
 
@@ -135,39 +136,10 @@ class SelveGateway(object):
         if self.controller is None:
             return True
 
-        self.controller.stopGateway()
+        await self.controller.stopGateway()
 
         await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, 'cover')
     
         await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, 'binary_sensor')
-    
-
-
-class SelveDevice(Entity):
-    """Representation of a Selve device entity."""
-
-    def __init__(self, selve_device, controller):
-        """Initialize the device."""
-        self.selve_device = selve_device
-        self._name = str(self.selve_device.name)
-
-    @callback
-    def async_register_callbacks(self):
-        """Register callbacks to update hass after device was changed."""
-
-    @property
-    def unique_id(self):
-        """Return the unique id base on the id returned by gateway."""
-        return str(self.selve_device.device_type.value) + str(self.selve_device.id)
-
-    @property
-    def name(self):
-        """Return the name of the device."""
-        return self._name
-
-    @property
-    def device_state_attributes(self):
-        """Return the state attributes of the device."""
-        return {"selve_device_id": self.selve_device.id}

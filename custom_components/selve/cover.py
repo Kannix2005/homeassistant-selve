@@ -20,8 +20,6 @@ from homeassistant.components.cover import (
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.config_entries import ConfigEntry
 
-from . import SelveDevice
-
 from homeassistant.const import ATTR_ENTITY_ID
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -57,7 +55,7 @@ SELVE_CLASSTYPES = {
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
     selve: Selve = hass.data[DOMAIN][config_entry.data[CONF_PORT]].controller
     try:
-        selve.discover()
+        await selve.discover()
     except PortError as ex:
         _LOGGER.exception("Error when trying to connect to the selve gateway")
         raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
@@ -88,8 +86,6 @@ class SelveCover(CoverEntity):
         self.controller = controller
         self._name = str(self.selve_device.name)
 
-        if self.isCommeo:
-            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     @property
     def unique_id(self):
@@ -109,6 +105,9 @@ class SelveCover(CoverEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
+        if self.isCommeo:
+           await self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
+        
         self.controller.register_callback(self.async_write_ha_state)
 
     async def async_will_remove_from_hass(self) -> None:
@@ -123,7 +122,7 @@ class SelveCover(CoverEntity):
         #self.controller.updateAllDevices()
 
         if self.isCommeo:
-            self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
+            await self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
 
     @property
     def isCommeo(self):
@@ -255,36 +254,36 @@ class SelveCover(CoverEntity):
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
-        self.controller.moveDeviceUp(self.selve_device)
+        await self.controller.moveDeviceUp(self.selve_device)
         
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
-        self.controller.moveDevicePos1(self.selve_device)
+        await self.controller.moveDevicePos1(self.selve_device)
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
-        self.controller.moveDeviceDown(self.selve_device)
+        await self.controller.moveDeviceDown(self.selve_device)
         
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""
-        self.controller.moveDevicePos2(self.selve_device)
+        await self.controller.moveDevicePos2(self.selve_device)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        self.controller.stopDevice(self.selve_device)
+        await self.controller.stopDevice(self.selve_device)
         
     async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
-        self.controller.stopDevice(self.selve_device)
+        await self.controller.stopDevice(self.selve_device)
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
         
         if self.isCommeo:
             _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-            self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+            await self.controller.moveDevicePos(self.selve_device, _current_cover_position)
         else:
             if kwargs.get(ATTR_POSITION) >= 50:
-                self.controller.moveDevicePos1(self.selve_device)
+                await self.controller.moveDevicePos1(self.selve_device)
             else:
-                self.controller.moveDevicePos2(self.selve_device)
+                await self.controller.moveDevicePos2(self.selve_device)

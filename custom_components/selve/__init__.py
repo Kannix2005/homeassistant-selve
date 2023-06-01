@@ -110,10 +110,6 @@ class SelveGateway(object):
         try:
             self.controller = Selve(port=port, discover=False, logger = _LOGGER)
             await self.controller.setup(discover=False, fromConfigFlow=False)
-            if await self.controller.gatewayReady() is not True:
-                await self.controller.resetGateway()
-                while await self.controller.gatewayReady() is not True:
-                    asyncio.sleep(1)
             await self.controller.setEvents(0, 0, 0, 0, 0) #deactivate events for discovery
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway")

@@ -52,6 +52,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
     return True
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up platform from a ConfigEntry."""
 
@@ -59,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     selvegat = SelveGateway(hass, entry)
     hass.data[DOMAIN][port] = selvegat
-    
+
     return await selvegat.async_setup()
 
 
@@ -74,7 +75,6 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
     if config_entry.version == 1:
-
         new = {**config_entry.data}
 
         config_entry.version = 2
@@ -108,34 +108,36 @@ class SelveGateway(object):
         hass = self.hass
 
         try:
-            self.controller = Selve(port=port, discover=False, logger = _LOGGER)
-            await self.controller.setup(discover=False, fromConfigFlow=False)
-            await self.controller.setEvents(0, 0, 0, 0, 0) #deactivate events for discovery
+            self.controller = Selve(port=port, logger=_LOGGER)
+            await self.controller.setup(discover=True)
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway")
             return False
-        
-        hass.async_add_job(hass.config_entries.async_forward_entry_setup(
-            self.config_entry, 'cover'))
-        
-        hass.async_add_job(hass.config_entries.async_forward_entry_setup(
-            self.config_entry, 'binary_sensor'))
 
-        await self.controller.setEvents(1, 1, 1, 1, 1) #activate events to enable values to be reported back
+        hass.async_add_job(
+            hass.config_entries.async_forward_entry_setup(self.config_entry, "cover")
+        )
+
+        hass.async_add_job(
+            hass.config_entries.async_forward_entry_setup(
+                self.config_entry, "binary_sensor"
+            )
+        )
         return True
-
 
     async def async_reset(self):
         if self.port is None:
             return True
-        
+
         if self.controller is None:
             return True
 
         await self.controller.stopGateway()
 
         await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, 'cover')
-    
+            self.config_entry, "cover"
+        )
+
         await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, 'binary_sensor')
+            self.config_entry, "binary_sensor"
+        )

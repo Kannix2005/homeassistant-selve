@@ -52,25 +52,32 @@ SELVE_CLASSTYPES = {
     11: "gateway",
 }
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info=None):
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info=None,
+):
     selve: Selve = hass.data[DOMAIN][config_entry.data[CONF_PORT]].controller
-    try:
-        await selve.discover()
-    except PortError as ex:
-        _LOGGER.exception("Error when trying to connect to the selve gateway")
-        raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
-    
+    # try:
+    #     await selve.discover()
+    # except PortError as ex:
+    #     _LOGGER.exception("Error when trying to connect to the selve gateway")
+    #     raise PlatformNotReady(f"Connection error while connecting to gateway: {ex}") from ex
+
     devicelist = []
     for id in selve.devices["device"]:
         devicelist.append(SelveCover(selve.devices["device"][id], selve))
 
     for id in selve.devices["iveo"]:
         devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
-        
+
     for id in selve.devices["group"]:
         devicelist.append(SelveCover(selve.devices["group"][id], selve))
-        
+
     async_add_entities(devicelist, True)
+
 
 async def update_listener(hass, config_entry):
     """Handle options update."""
@@ -85,7 +92,6 @@ class SelveCover(CoverEntity):
         self.selve_device.openState = 50
         self.controller = controller
         self._name = str(self.selve_device.name)
-
 
     @property
     def unique_id(self):
@@ -102,12 +108,11 @@ class SelveCover(CoverEntity):
         """Return the state attributes of the device."""
         return {"selve_device_id": self.selve_device.id}
 
-
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
         if self.isCommeo:
-           await self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
-        
+            await self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
+
         self.controller.register_callback(self.async_write_ha_state)
 
     async def async_will_remove_from_hass(self) -> None:
@@ -117,9 +122,9 @@ class SelveCover(CoverEntity):
     async def async_update(self):
         """Update method. Not needed when using callbacks."""
 
-        #self.controller.state = self.controller.gatewayState()
+        # self.controller.state = self.controller.gatewayState()
 
-        #self.controller.updateAllDevices()
+        # self.controller.updateAllDevices()
 
         if self.isCommeo:
             await self.controller.updateCommeoDeviceValuesAsync(self.selve_device.id)
@@ -131,7 +136,6 @@ class SelveCover(CoverEntity):
     @property
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
-
 
     @property
     def should_poll(self):
@@ -161,12 +165,11 @@ class SelveCover(CoverEntity):
         else:
             return ()
 
-
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        #fwV = self.controller.getGatewayFirmwareVersion()
-        #gId = self.controller.getGatewaySerial()
+        # fwV = self.controller.getGatewayFirmwareVersion()
+        # gId = self.controller.getGatewaySerial()
         return DeviceInfo(
             identifiers={
                 # Serial numbers are unique identifiers within a specific domain
@@ -185,11 +188,11 @@ class SelveCover(CoverEntity):
         Return current position of cover.
         0 is closed, 100 is fully open. Can be reversed by options.
         """
-        #if self.isCommeo:
-        
-        #if self.controller.config.get("switch_dir"):
+        # if self.isCommeo:
+
+        # if self.controller.config.get("switch_dir"):
         #     return self.selve_device.value
-        
+
         return 100 - self.selve_device.value
 
     @property
@@ -198,21 +201,26 @@ class SelveCover(CoverEntity):
         Return current position of cover.
         2 is closed, 98 is fully open. Can be reversed by options.
         """
-        #if self.isCommeo:
-        value = 2 if self.selve_device.value < 2 else 98 if self.selve_device.value > 98 else self.selve_device.value
-        #if self.controller.config.get("switch_dir"):
+        # if self.isCommeo:
+        value = (
+            2
+            if self.selve_device.value < 2
+            else 98
+            if self.selve_device.value > 98
+            else self.selve_device.value
+        )
+        # if self.controller.config.get("switch_dir"):
         #    return value
-        
+
         return 100 - value
 
     @property
     def is_closed(self):
         """Return if the cover is closed."""
         if self.current_cover_position is not None:
-            
-        #    if self.controller.config.get("switch_dir"):
-        #        return self.current_cover_position == 100
-            
+            #    if self.controller.config.get("switch_dir"):
+            #        return self.current_cover_position == 100
+
             return self.current_cover_position == 0
         return None
 
@@ -228,10 +236,9 @@ class SelveCover(CoverEntity):
     def device_class(self):
         """Return the class of the device."""
         return SELVE_CLASSTYPES.get(self.selve_device.device_sub_type.value)
-    
+
     @property
     def extra_state_attributes(self):
-
         gatewayState = ""
 
         # try:
@@ -248,14 +255,16 @@ class SelveCover(CoverEntity):
             "value": self.selve_device.value,
             "tiltValue": self.current_cover_tilt_position,
             "targetValue": self.selve_device.targetValue,
-            "communicationType": self.selve_device.communicationType.name if self.selve_device.communicationType.name else "",
-            "gatewayState": gatewayState
+            "communicationType": self.selve_device.communicationType.name
+            if self.selve_device.communicationType.name
+            else "",
+            "gatewayState": gatewayState,
         }
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         await self.controller.moveDeviceUp(self.selve_device)
-        
+
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
         await self.controller.moveDevicePos1(self.selve_device)
@@ -263,7 +272,7 @@ class SelveCover(CoverEntity):
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         await self.controller.moveDeviceDown(self.selve_device)
-        
+
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""
         await self.controller.moveDevicePos2(self.selve_device)
@@ -271,19 +280,21 @@ class SelveCover(CoverEntity):
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         await self.controller.stopDevice(self.selve_device)
-        
+
     async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
         await self.controller.stopDevice(self.selve_device)
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
-        
+
         if self.isCommeo:
             _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-            await self.controller.moveDevicePos(self.selve_device, _current_cover_position)
+            await self.controller.moveDevicePos(
+                self.selve_device, _current_cover_position
+            )
         else:
             if kwargs.get(ATTR_POSITION) >= 50:
-                await self.controller.moveDevicePos1(self.selve_device)
+                await self.controller.moveDeviceUp(self.selve_device)
             else:
-                await self.controller.moveDevicePos2(self.selve_device)
+                await self.controller.moveDeviceDown(self.selve_device)

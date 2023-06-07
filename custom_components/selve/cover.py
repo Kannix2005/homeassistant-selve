@@ -136,11 +136,10 @@ class SelveCover(CoverEntity):
     @property
     def isIveo(self):
         return self.selve_device.communicationType.name == "IVEO"
-    
+
     @property
     def isGroup(self):
         return self.selve_device.device_type.name == "GROUP"
-
 
     @property
     def should_poll(self):
@@ -243,7 +242,6 @@ class SelveCover(CoverEntity):
 
     @property
     def is_opening(self):
-        
         if self.isGroup:
             return ""
         return self.selve_device.state.name == "UP_ON"
@@ -273,6 +271,16 @@ class SelveCover(CoverEntity):
         #     if self.controller.state.name:
         #         gatewayState = self.controller.state.name
 
+        if self.isGroup:
+            return {
+                "value": 50,
+                "tiltValue": 0,
+                "targetValue": 50,
+                "communicationType": self.selve_device.communicationType.name
+                if self.selve_device.communicationType.name
+                else "",
+                "gatewayState": gatewayState,
+            }
 
         return {
             "value": self.selve_device.value,

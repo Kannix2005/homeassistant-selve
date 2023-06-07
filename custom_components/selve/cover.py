@@ -295,7 +295,7 @@ class SelveCover(CoverEntity):
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         if self.isGroup:
-            self.controller.moveGroupUp(self.selve_device)
+            await self.controller.moveGroupUp(self.selve_device)
             return
         await self.controller.moveDeviceUp(self.selve_device)
 
@@ -306,7 +306,7 @@ class SelveCover(CoverEntity):
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         if self.isGroup:
-            self.controller.moveGroupDown(self.selve_device)
+            await self.controller.moveGroupDown(self.selve_device)
             return
         await self.controller.moveDeviceDown(self.selve_device)
 
@@ -317,7 +317,7 @@ class SelveCover(CoverEntity):
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         if self.isGroup:
-            self.controller.stopGroup(self.selve_device)
+            await self.controller.stopGroup(self.selve_device)
             return
         await self.controller.stopDevice(self.selve_device)
 

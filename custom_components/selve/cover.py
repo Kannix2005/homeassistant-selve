@@ -243,14 +243,16 @@ class SelveCover(CoverEntity):
     @property
     def is_opening(self):
         if self.isGroup:
-            return ""
-        return self.selve_device.state.name == "UP_ON"
+            return None
+        if self.selve_device.state is not None:
+            return self.selve_device.state.name == "UP_ON"
 
     @property
     def is_closing(self):
         if self.isGroup:
-            return ""
-        return self.selve_device.state.name == "DOWN_ON"
+            return None
+        if self.selve_device.state is not None:
+            return self.selve_device.state.name == "DOWN_ON"
 
     @property
     def device_class(self):

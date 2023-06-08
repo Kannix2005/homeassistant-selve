@@ -138,6 +138,10 @@ class SelveCover(CoverEntity):
         return self.selve_device.communicationType.name == "IVEO"
 
     @property
+    def isGroup(self):
+        return self.selve_device.device_type.name == "GROUP"
+
+    @property
     def should_poll(self):
         # Disable polling when using push
         return False
@@ -145,6 +149,13 @@ class SelveCover(CoverEntity):
     @property
     def supported_features(self):
         """Flag supported features."""
+        if self.isGroup:
+            return (
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.STOP
+            )
+
         if self.isCommeo:
             return (
                 CoverEntityFeature.OPEN
@@ -192,6 +203,8 @@ class SelveCover(CoverEntity):
 
         # if self.controller.config.get("switch_dir"):
         #     return self.selve_device.value
+        if self.isGroup:
+            return 50
 
         return 100 - self.selve_device.value
 
@@ -202,6 +215,10 @@ class SelveCover(CoverEntity):
         2 is closed, 98 is fully open. Can be reversed by options.
         """
         # if self.isCommeo:
+
+        if self.isGroup:
+            return 50
+
         value = (
             2
             if self.selve_device.value < 2
@@ -226,10 +243,14 @@ class SelveCover(CoverEntity):
 
     @property
     def is_opening(self):
+        if self.isGroup:
+            return None
         return self.selve_device.state.name == "UP_ON"
 
     @property
     def is_closing(self):
+        if self.isGroup:
+            return None
         return self.selve_device.state.name == "DOWN_ON"
 
     @property
@@ -251,6 +272,17 @@ class SelveCover(CoverEntity):
         #     if self.controller.state.name:
         #         gatewayState = self.controller.state.name
 
+        if self.isGroup:
+            return {
+                "value": 50,
+                "tiltValue": 0,
+                "targetValue": 50,
+                "communicationType": self.selve_device.communicationType.name
+                if self.selve_device.communicationType.name
+                else "",
+                "gatewayState": gatewayState,
+            }
+
         return {
             "value": self.selve_device.value,
             "tiltValue": self.current_cover_tilt_position,
@@ -263,6 +295,9 @@ class SelveCover(CoverEntity):
 
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
+        if self.isGroup:
+            await self.controller.moveGroupUp(self.selve_device)
+            return
         await self.controller.moveDeviceUp(self.selve_device)
 
     async def async_open_cover_tilt(self, **kwargs):
@@ -271,6 +306,9 @@ class SelveCover(CoverEntity):
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
+        if self.isGroup:
+            await self.controller.moveGroupDown(self.selve_device)
+            return
         await self.controller.moveDeviceDown(self.selve_device)
 
     async def async_close_cover_tilt(self, **kwargs):
@@ -279,6 +317,9 @@ class SelveCover(CoverEntity):
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
+        if self.isGroup:
+            await self.controller.stopGroup(self.selve_device)
+            return
         await self.controller.stopDevice(self.selve_device)
 
     async def async_stop_cover_tilt(self, **kwargs):

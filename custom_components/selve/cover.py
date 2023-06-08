@@ -149,6 +149,13 @@ class SelveCover(CoverEntity):
     @property
     def supported_features(self):
         """Flag supported features."""
+        if self.isGroup:
+            return (
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.STOP
+            )
+
         if self.isCommeo:
             return (
                 CoverEntityFeature.OPEN
@@ -165,12 +172,6 @@ class SelveCover(CoverEntity):
                 | CoverEntityFeature.CLOSE
                 | CoverEntityFeature.STOP
                 | CoverEntityFeature.SET_POSITION
-            )
-        elif self.isGroup:
-            return (
-                CoverEntityFeature.OPEN
-                | CoverEntityFeature.CLOSE
-                | CoverEntityFeature.STOP
             )
         else:
             return ()
@@ -244,15 +245,13 @@ class SelveCover(CoverEntity):
     def is_opening(self):
         if self.isGroup:
             return None
-        if self.selve_device.state is not None:
-            return self.selve_device.state.name == "UP_ON"
+        return self.selve_device.state.name == "UP_ON"
 
     @property
     def is_closing(self):
         if self.isGroup:
             return None
-        if self.selve_device.state is not None:
-            return self.selve_device.state.name == "DOWN_ON"
+        return self.selve_device.state.name == "DOWN_ON"
 
     @property
     def device_class(self):

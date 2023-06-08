@@ -64,13 +64,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await selvegat.async_setup()
 
 
-async def async_unload_entry(hass, entry):
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
-    controller = hass.data[DOMAIN].pop(entry.data[CONF_PORT])
-    return await controller.async_reset()
+    controller = hass.data[DOMAIN][entry.data[CONF_PORT]]
+    platforms = ["cover", "binary_sensor"]
+    unloaded = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(entry, platform)
+                for platform in PLATFORMS
+                if platform in platforms
+            ]
+        )
+    )
+
+    await controller.async_reset()
+    if unloaded:
+        hass.data[DOMAIN].pop(entry.data[CONF_PORT])
+    return unloaded
 
 
-async def async_migrate_entry(hass, config_entry: ConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
@@ -101,7 +115,9 @@ class SelveGateway(object):
 
     @property
     def available(self):
-        return self.controller.pingGateway()
+        return asyncio.run_coroutine_threadsafe(
+            self.controller.pingGateway(), self.hass.loop
+        ).result()
 
     async def async_setup(self):
         port = self.port
@@ -132,12 +148,12 @@ class SelveGateway(object):
         if self.controller is None:
             return True
 
-        await self.controller.stopGateway()
+        await self.hass.config_entries.async_forward_entry_unload(
+            self.config_entry, "binary_sensor"
+        )
 
         await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, "cover"
         )
 
-        await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, "binary_sensor"
-        )
+        await self.controller.stopGateway()

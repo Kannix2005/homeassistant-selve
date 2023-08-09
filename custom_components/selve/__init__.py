@@ -4,7 +4,6 @@ Support for Selve devices.
 
 from __future__ import annotations
 import asyncio
-from homeassistant.components import discovery
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN

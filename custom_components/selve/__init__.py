@@ -126,14 +126,20 @@ class SelveGateway(object):
             self.controller = Selve(port=port, logger=_LOGGER)
             await self.controller.setup(discover=True)
         except PortError as ex:
-            _LOGGER.exception("Error when trying to connect to the selve gateway")
+            _LOGGER.exception("Error when trying to connect to the selve gateway - trying autodetection")
+            try:
+                self.controller = Selve(port=port, logger=_LOGGER)
+                await self.controller.setup(discover=True)
+            except Exception as e:
+                _LOGGER.exception("Error when trying to connect to the selve gateway - also failed with autodetection")
+
             return False
 
-        hass.async_add_job(
+        hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(self.config_entry, "cover")
         )
 
-        hass.async_add_job(
+        hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(
                 self.config_entry, "binary_sensor"
             )

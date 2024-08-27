@@ -203,7 +203,7 @@ class SelveGateway(object):
             }
 
         
-        self.hass.async_fire("selve_event", event_data)
+        self.hass.bus.async_fire("selve_event", event_data)
 
 
     async def async_reset(self):

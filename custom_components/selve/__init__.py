@@ -14,7 +14,8 @@ from homeassistant.const import CONF_PORT
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
-from selve import Selve, PortError
+from homeassistant.helpers import device_registry as dr
+from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse
 
 
 REQUIREMENTS = ["python-selve-new"]
@@ -58,9 +59,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     port = entry.data[CONF_PORT] if entry.data[CONF_PORT] is not None else "1"
 
     selvegat = SelveGateway(hass, entry)
+    
     hass.data[DOMAIN][port] = selvegat
 
     return await selvegat.async_setup()
+
+ 
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
+    """Handle options update."""
+    hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
@@ -106,6 +113,8 @@ class SelveGateway(object):
         self.config_entry = config_entry
         self.hass = hass
         self.controller = None
+        self.gatewayId = None
+        self.gatewayFW = None
 
     @property
     def port(self):
@@ -135,6 +144,27 @@ class SelveGateway(object):
 
             return False
 
+        self.gatewayId = await self.controller.getGatewaySerial()
+        self.gatewayFW = await self.controller.getGatewayFirmwareVersion()
+
+        device_registry = dr.async_get(hass)
+        device_registry.async_get_or_create(
+            config_entry_id=self.config_entry.entry_id,
+            connections={},
+            identifiers={(DOMAIN, gatewayId)},
+            manufacturer="Selve",
+            suggested_area="",
+            name="Selve USB-RF Gateway",
+            model="USB",
+            model_id=gatewayId,
+            sw_version=gatewayFW,
+            hw_version="1",
+        )
+
+        self.config_entry.async_on_unload(self.config_entry.add_update_listener(self.update_listener))
+
+        self.controller.register_event_callback(self._event_callback)
+
         hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(self.config_entry, "cover")
         )
@@ -145,6 +175,34 @@ class SelveGateway(object):
             )
         )
         return True
+
+    @callback
+    def _event_callback(self, response):
+        """Is called when a event arrives."""
+
+        if isinstance(response, SenderEventResponse):
+
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "sender_event",
+                "senderName": response.senderName,
+                "id": response.id,
+                "event": response.event
+            }
+
+        
+        if isinstance(response, DutyCycleResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "dutycycle_event",
+                "mode": response.mode,
+                "traffic": response.traffic
+            }
+
+        
+        self.hass.async_fire("selve_event", event_data)
+
 
     async def async_reset(self):
         if self.port is None:

@@ -1,0 +1,28 @@
+teach_start:
+
+teach_state:
+
+reset:
+
+set_led:
+  fields:
+    state:
+      default: true
+      selector:
+        boolean:
+
+
+
+# example:
+#   fields:
+#     duration:
+#       default: 60
+#       selector:
+#         number:
+#           min: 0
+#           max: 254
+#           unit_of_measurement: seconds
+#     ieee:
+#       example: "00:0d:6f:00:05:7d:2d:34"
+#       selector:
+#         text:

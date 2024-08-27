@@ -5,13 +5,13 @@ Support for Selve devices.
 from __future__ import annotations
 import asyncio
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant, ServiceCall, callback
 from .const import DOMAIN
 from collections import defaultdict
 import logging
 import voluptuous as vol
 from homeassistant.const import CONF_PORT
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_platform, service
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry as dr
@@ -61,8 +61,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     selvegat = SelveGateway(hass, entry)
     
     hass.data[DOMAIN][port] = selvegat
-
-    return await selvegat.async_setup()
+    await selvegat.async_setup()
+    return True
 
  
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
@@ -125,9 +125,11 @@ class SelveGateway(object):
     async def async_setup(self):
         port = self.port
         hass = self.hass
+        loop=asyncio.get_running_loop()
+
 
         try:
-            self.controller = Selve(port=port, logger=_LOGGER)
+            self.controller = Selve(port=port, logger=_LOGGER, loop=loop)
             await self.controller.setup(discover=True)
         except PortError as ex:
             _LOGGER.exception("Error when trying to connect to the selve gateway - trying autodetection")
@@ -169,14 +171,53 @@ class SelveGateway(object):
                 self.config_entry, "binary_sensor"
             )
         )
+
+
+
+        hass.services.async_register(DOMAIN, 'teach_start', self.teach_start)
+        hass.services.async_register(DOMAIN, 'teach_state', self.teach_state)
+        hass.services.async_register(DOMAIN, 'reset', self.reset)
+        hass.services.async_register(DOMAIN, 'set_led', self.set_led)
+
+
         return True
 
+    #Services
+    async def teach_start(
+            self, service: ServiceCall
+    ) -> None:
+        """Start teaching"""
+        return await self.controller.senderTeachStart()
+        
 
+    async def teach_state(
+            self, service: ServiceCall
+    ) -> None:
+        """Get teaching state"""
+        return await self.controller.senderTeachResult()
+
+
+    async def reset(
+            self, service: ServiceCall
+    ) -> None:
+        """Reset GW"""
+        return await self.controller.resetGateway()
+
+
+    async def set_led(
+            self, service: ServiceCall
+    ) -> None:
+        """Set LED"""
+        state = service.data["state"]
+        return await self.controller.setLED(state)
+
+
+    #Listeners
     async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
         hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
 
-
+    #Callbacks
 
     @callback
     def _event_callback(self, response):

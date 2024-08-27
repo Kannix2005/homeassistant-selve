@@ -5,7 +5,7 @@ Support for Selve devices.
 from __future__ import annotations
 import asyncio
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.core import HomeAssistant, ServiceCall, callback, ServiceResponse, SupportsResponse
 from .const import DOMAIN
 from collections import defaultdict
 import logging
@@ -177,7 +177,7 @@ class SelveGateway(object):
         hass.services.async_register(DOMAIN, 'teach_start', self.teach_start)
         hass.services.async_register(DOMAIN, 'teach_state', self.teach_state)
         hass.services.async_register(DOMAIN, 'reset', self.reset)
-        hass.services.async_register(DOMAIN, 'set_led', self.set_led)
+        hass.services.async_register(DOMAIN, 'set_led', self.set_led, supports_response=SupportsResponse.ONLY)
 
 
         return True
@@ -206,10 +206,15 @@ class SelveGateway(object):
 
     async def set_led(
             self, service: ServiceCall
-    ) -> None:
+    ) -> ServiceResponse:
         """Set LED"""
         state = service.data["state"]
-        return await self.controller.setLED(state)
+        await self.controller.setLED(state)
+        response = await self.controller.getLED()
+
+        return {
+            "state": response.ledmode,
+        }
 
 
     #Listeners

@@ -151,13 +151,13 @@ class SelveGateway(object):
         device_registry.async_get_or_create(
             config_entry_id=self.config_entry.entry_id,
             connections={},
-            identifiers={(DOMAIN, gatewayId)},
+            identifiers={(DOMAIN, self.gatewayId)},
             manufacturer="Selve",
             suggested_area="",
             name="Selve USB-RF Gateway",
             model="USB",
-            model_id=gatewayId,
-            sw_version=gatewayFW,
+            model_id=self.gatewayId,
+            sw_version=self.gatewayFW,
             hw_version="1",
         )
 

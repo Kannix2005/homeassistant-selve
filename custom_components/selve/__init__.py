@@ -65,11 +65,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return await selvegat.async_setup()
 
  
-async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
-    """Handle options update."""
-    hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
-
-
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     controller = hass.data[DOMAIN][entry.data[CONF_PORT]]
@@ -175,6 +170,13 @@ class SelveGateway(object):
             )
         )
         return True
+
+
+    async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
+        """Handle options update."""
+        hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
+
+
 
     @callback
     def _event_callback(self, response):

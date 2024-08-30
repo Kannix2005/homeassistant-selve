@@ -15,7 +15,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry as dr
-from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse
+from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse, SenderTeachResultResponse, SensorTeachResultResponse, DeviceScanResultResponse
 
 
 REQUIREMENTS = ["python-selve-new"]
@@ -220,7 +220,12 @@ class SelveGateway(object):
     #Listeners
     async def update_listener(self, hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
-        hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
+        if entry.options.switch_dir is True:
+            flag = 1
+        else:
+            flag = 0
+        self.controller.updateOptions(flag)
+        await self.controller.updateAllDevices()
         await hass.config_entries.async_reload(entry.entry_id)
 
     #Callbacks
@@ -228,6 +233,8 @@ class SelveGateway(object):
     @callback
     def _event_callback(self, response):
         """Is called when an event arrives."""
+
+        event_data = {}
 
         if isinstance(response, SenderEventResponse):
 
@@ -237,7 +244,7 @@ class SelveGateway(object):
                 "senderName": response.senderName,
                 "id": response.id,
                 "event": response.event,
-                "data": response
+                "parameters": response.parameters
             }
 
         
@@ -254,8 +261,25 @@ class SelveGateway(object):
             
             event_data = {
                 "device_id": self.gatewayId,
-                "type": "commeoo_event",
-                "data": response
+                "type": "commeo_event",
+                "parameters": response.parameters,
+                "actorState": response.actorState,
+                "alarm": response.alarm,
+                "automaticMode": response.automaticMode,
+                "dayMode": response.dayMode,
+                "deviceType": response.deviceType,
+                "freezingAlarm": response.freezingAlarm,
+                "gatewayNotLearned": response.gatewayNotLearned,
+                "id": response.id,
+                "lostSensor": response.lostSensor,
+                "name": response.name,
+                "obstructed": response.obstructed,
+                "overload": response.overload,
+                "rainAlarm": response.rainAlarm,
+                "targetValue": response.targetValue,
+                "value": response.value,
+                "unreachable": response.unreachable,
+                "windAlarm": response.windAlarm
             }
 
         if isinstance(response, SensorEventResponse):
@@ -263,7 +287,20 @@ class SelveGateway(object):
             event_data = {
                 "device_id": self.gatewayId,
                 "type": "sensor_event",
-                "data": response
+                "dayLightAnalog": response.dayLightAnalog,
+                "id": response.id,
+                "lightDigital": response.lightDigital,
+                "name": response.name,
+                "parameters": response.parameters,
+                "rainDigital": response.rainDigital,
+                "sensorState": response.sensorState,
+                "sun1Analog": response.sun1Analog,
+                "sun2Analog": response.sun2Analog,
+                "sun3Analog": response.sun3Analog,
+                "tempAnalog": response.tempAnalog,
+                "tempDigital": response.tempDigital,
+                "windAnalog": response.windAnalog,
+                "windDigital": response.windDigital
             }
 
         if isinstance(response, LogEventResponse):
@@ -271,9 +308,60 @@ class SelveGateway(object):
             event_data = {
                 "device_id": self.gatewayId,
                 "type": "log_event",
-                "data": response
+                "parameters": response.parameters,
+                "logCode": response.logCode,
+                "logDescription": response.logDescription,
+                "logStamp": response.logStamp,
+                "logType": response.logType,
+                "logValue": response.logValue,
+                "name": response.name
             }
         
+
+        if isinstance(response, SenderTeachResultResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "sender_teach_event",
+                "parameters": response.parameters,
+                "name": response.name,
+                "senderEvent": response.senderEvent,
+                "senderId": response.senderId,
+                "teachState": response.teachState,
+                "timeLeft": response.timeLeft
+            }
+
+        if isinstance(response, SensorTeachResultResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "sensor_teach_event",
+                "parameters": response.parameters,
+                "foundId": response.foundId,
+                "name": response.name,
+                "teachState": response.teachState,
+                "timeLeft": response.timeLeft
+            }
+
+        if isinstance(response, DeviceScanResultResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "device_scan_event",
+                "parameters": response.parameters,
+                "name": response.name,
+                "foundIds": response.foundIds,
+                "noNewDevices": response.noNewDevices,
+                "scanState": response.scanState
+            }
+        
+        if not event_data:
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "unknown_event"
+            }
+
+
         self.hass.bus.async_fire("selve_event", event_data)
 
 

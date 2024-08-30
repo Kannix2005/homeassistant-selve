@@ -15,7 +15,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry as dr
-from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse
+from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse
 
 
 REQUIREMENTS = ["python-selve-new"]
@@ -158,7 +158,7 @@ class SelveGateway(object):
             hw_version="1",
         )
 
-        self.config_entry.async_on_unload(self.config_entry.add_update_listener(self.update_listener))
+        self.config_entry.add_update_listener(self.update_listener)
 
         self.controller.register_event_callback(self._event_callback)
 
@@ -221,12 +221,13 @@ class SelveGateway(object):
     async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
         hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
+        await hass.config_entries.async_reload(entry.entry_id)
 
     #Callbacks
 
     @callback
     def _event_callback(self, response):
-        """Is called when a event arrives."""
+        """Is called when an event arrives."""
 
         if isinstance(response, SenderEventResponse):
 
@@ -235,7 +236,8 @@ class SelveGateway(object):
                 "type": "sender_event",
                 "senderName": response.senderName,
                 "id": response.id,
-                "event": response.event
+                "event": response.event,
+                "data": response
             }
 
         
@@ -248,6 +250,29 @@ class SelveGateway(object):
                 "traffic": response.traffic
             }
 
+        if isinstance(response, CommeoDeviceEventResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "commeoo_event",
+                "data": response
+            }
+
+        if isinstance(response, SensorEventResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "sensor_event",
+                "data": response
+            }
+
+        if isinstance(response, LogEventResponse):
+            
+            event_data = {
+                "device_id": self.gatewayId,
+                "type": "log_event",
+                "data": response
+            }
         
         self.hass.bus.async_fire("selve_event", event_data)
 

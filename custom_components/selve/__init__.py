@@ -158,7 +158,7 @@ class SelveGateway(object):
             hw_version="1",
         )
 
-        self.config_entry.add_update_listener(self.update_listener)
+        self.config_entry.async_on_unload(self.config_entry.add_update_listener(self.update_listener))
 
         self.controller.register_event_callback(self._event_callback)
 
@@ -220,7 +220,7 @@ class SelveGateway(object):
     #Listeners
     async def update_listener(self, hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
-        if entry.options.switch_dir is True:
+        if entry.options["switch_dir"] is True:
             flag = 1
         else:
             flag = 0

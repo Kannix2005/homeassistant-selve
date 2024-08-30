@@ -218,7 +218,7 @@ class SelveGateway(object):
 
 
     #Listeners
-    async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
+    async def update_listener(self, hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
         hass.data[DOMAIN][entry.data[CONF_PORT]].updateOptions(entry.options.switch_dir)
         await hass.config_entries.async_reload(entry.entry_id)

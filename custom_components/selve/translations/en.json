@@ -26,5 +26,22 @@
             }
           }
         }
+    },
+    "selector": {
+        "function": {
+            
+          "options":{
+            "SELECT": "Do a signalization drive",
+            "INSTALL": "Restart install mode",
+            "SENSOR": "Start the learn mode for a sensor",
+            "MANPROG": "Start the manual setting of the endstop position",
+            "AUTOPROG": "Start the automatic setting of the endstop position",
+            "STOREPOSITION": "Store the current position as an endstop",
+            "DRIVEUP": "Manually drive up",
+            "DRIVEDOWN": "Manually drive down",
+            "KEYRELEASE": "Release key press",
+            "DRIVESTOP": "Stop the actor"
+          }
+        }
     }
 }

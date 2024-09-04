@@ -1,16 +1,817 @@
-teach_start:
-
-teach_state:
-
-reset:
-
 set_led:
   fields:
     state:
       default: true
       selector:
         boolean:
+get_led:
 
+ping_gateway:
+gateway_state:
+reset:
+get_gateway_firmware_version:
+get_gateway_serial:
+get_gateway_spec:
+factory_reset_gateway:
+update_all_devices:
+set_forward:
+  fields:
+    state:
+      default: true
+      selector:
+        boolean:
+get_forward:
+
+set_events:
+  fields:
+    event_device:
+      default: true
+      selector:
+        boolean:
+    event_sensor:
+      default: true
+      selector:
+        boolean:
+    event_sender:
+      default: true
+      selector:
+        boolean:
+    event_logging:
+      default: true
+      selector:
+        boolean:
+    event_duty:
+      default: true
+      selector:
+        boolean:
+
+get_events:
+get_duty:
+get_rf:
+device_scan_start:
+device_scan_stop:
+device_scan_result:
+device_save:
+device_get_ids:
+device_get_info:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+device_get_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+device_set_function:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    function:
+      required: true
+      default: SELECT
+      selector:
+        select:
+          options:
+            - "SELECT"
+            - "INSTALL"
+            - "SENSOR"
+            - "MANPROG"
+            - "AUTOPROG"
+            - "STOREPOSITION"
+            - "DRIVEUP"
+            - "DRIVEDOWN"
+            - "KEYRELEASE"
+            - "DRIVESTOP"
+
+device_set_label:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    label:
+      required: true
+      selector:
+        text:
+device_set_type:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "UNKNOWN"
+            - "SHUTTER"
+            - "BLIND"
+            - "AWNING"
+            - "SWITCH"
+            - "DIMMER"
+            - "NIGHT_LIGHT"
+            - "DRAWN_LIGHT"
+            - "HEATING"
+            - "COOLING"
+            - "SWITCHDAY"
+            - "GATEWAY"
+device_delete:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+device_write_manual:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    address:
+      required: true
+      selector:
+        text:
+    name:
+      required: true
+      selector:
+        text:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "UNKNOWN"
+            - "SHUTTER"
+            - "BLIND"
+            - "AWNING"
+            - "SWITCH"
+            - "DIMMER"
+            - "NIGHT_LIGHT"
+            - "DRAWN_LIGHT"
+            - "HEATING"
+            - "COOLING"
+            - "SWITCHDAY"
+            - "GATEWAY"
+device_update_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+device_set_value:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    value:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+device_set_target_value:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    value:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+device_set_state:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    state:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "UNKOWN"
+            - "STOPPED_OFF"
+            - "UP_ON"
+            - "DOWN_ON"
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+device_move_up:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_down:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_pos1:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_pos2:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_pos:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_stop:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_step_up:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    degrees:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_move_step_down:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    degrees:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "SERVICE"
+            - "PARAM"
+            - "DEVICE"
+            - "SENSOR"
+            - "SENSIM"
+            - "SENDER"
+            - "GROUP"
+            - "COMMAND"
+            - "EVENT"
+            - "IVEO"
+            - "COMMEO"
+            - "FIRMWARE"
+            - "UNKNOWN"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+group_read:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+group_write:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    ids:
+      required: true
+      selector:
+        text:
+    name:
+      required: true
+      selector:
+        text:
+group_get_ids:
+group_delete:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+group_move_up:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+group_move_down:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+group_stop:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+iveo_set_repeater:
+  fields:
+    config:
+      required: true
+      selector:
+        select:
+          options:
+            - "NONE"
+            - "SINGLEREPEAT"
+            - "MULTIREPEAT"
+iveo_get_repeater:
+iveo_set_label:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    label:
+      required: true
+      selector:
+        text:
+iveo_set_type:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: true
+      default: UNKNOWN
+      selector:
+        select:
+          options:
+            - "UNKNOWN"
+            - "SHUTTER"
+            - "BLIND"
+            - "AWNING"
+            - "SWITCH"
+            - "DIMMER"
+            - "NIGHT_LIGHT"
+            - "DRAWN_LIGHT"
+            - "HEATING"
+            - "COOLING"
+            - "SWITCHDAY"
+            - "GATEWAY"
+iveo_get_type:
+iveo_get_ids:
+iveo_factory_reset:
+iveo_teach:
+iveo_learn:
+iveo_command_manual:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: false
+      default: STOP
+      selector:
+        select:
+          options:
+            - "STOP"
+            - "UP"
+            - "DOWN"
+            - "POS1"
+            - "POS2"
+            - "LEARNTELEGRAMSENT"
+            - "TEACHTELEGRAMSENT"
+iveo_command_automatic:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: false
+      default: STOP
+      selector:
+        select:
+          options:
+            - "STOP"
+            - "UP"
+            - "DOWN"
+            - "POS1"
+            - "POS2"
+            - "LEARNTELEGRAMSENT"
+            - "TEACHTELEGRAMSENT"
+sensor_teach_start:
+sensor_teach_stop:
+sensor_teach_result:
+sensor_get_ids:
+sensor_get_info:
+sensor_get_values:
+sensor_set_label:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    label:
+      required: true
+      selector:
+        text:
+sensor_delete:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sensor_write_manual:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    address:
+      required: true
+      selector:
+        text:
+    name:
+      required: true
+      selector:
+        text:
+sensor_update_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sender_teach_start:
+sender_teach_stop:
+sender_teach_result:
+sender_get_ids:
+sender_get_info:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sender_get_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sender_set_label:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    label:
+      required: true
+      selector:
+        text:
+sender_delete:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sender_write_manual:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    address:
+      required: true
+      selector:
+        number:
+    channel:
+      required: true
+      selector:
+        number:
+    reset_count:
+      required: true
+      selector:
+        number:
+    name:
+      required: true
+      selector:
+        text:
+sender_update_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 
 
 # example:

@@ -26,5 +26,323 @@
             }
           }
         }
+    },
+    "selector": {
+        "function": {
+          "options":{
+            "SELECT": "Mit dieser Funktion wird dem Aktor mitgeteilt eine Signalisierungsfahrt durchzuführen. Bei z.B. Motoren ist dies ein kurzes Zucken.",
+            "INSTALL": "Mit dieser Funktion wird dem Aktor mitgeteilt den Installationsmodus neu zu starten. Damit kann der Aktor von anderen commeo Sender wieder gefunden werden, ohne ihn vom Netz trennen zu müssen.",
+            "SENSOR": "Mit dieser Funktion kann der Aktor in den Sensorlernmodus versetzt werden, um einen Sensor im Aktor einlernen zu können.",
+            "MANPROG": "Die manuelle Endlageneinstellung im Aktor wird gestartet.",
+            "AUTOPROG": "Die automatische Endlageneinstellung im Aktor wird gestartet.",
+            "STOREPOSITION": "In der manuellen Endlageneinstellung wird diese Funktion zum Speichern der Endlagen genutzt.",
+            "DRIVEUP": "Während der Endlageneinstellung kann mit dieser Funktion der Aktor im Totmannbetrieb aufgefahren werden.",
+            "DRIVEDOWN": "Während der Endlageneinstellung kann mit dieser Funktion der Aktor im Totmannbetrieb abgefahren werden.",
+            "KEYRELEASE": "Während der Endlageneinstellung befinden sich die Aktor im Totmannbetrieb, so dass mit dieser Funktion die Fahrt unterbrochen werden muss.",
+            "DRIVESTOP": "Während der Endlageneinstellung kann mit Hilfe eines direkten Stops der Aktor ebenfalls gestoppt werden."
+          }
+        },
+        
+        "type": {
+            "options":{
+              "UNKNOWN": "Unbekannt",
+              "SHUTTER": "Rollladen",
+              "BLIND": "Jalousie",
+              "AWNING": "Markise",
+              "SWITCH": "Schaltaktor",
+              "DIMMER": "Dimmer",
+              "NIGHT_LIGHT": "Nachtlicht Aktor",
+              "DRAWN_LIGHT": "Dämmerlicht Aktor",
+              "HEATING": "Heizung",
+              "COOLING": "Kühlgerät",
+              "SERVICE": "Service",
+              "PARAM": "Parameter",
+              "DEVICE": "Gerät",
+              "SENSOR": "Sensor",
+              "SENSIM": "Sensor Simulation",
+              "SENDER": "Sender",
+              "GROUP": "Gruppe",
+              "COMMAND": "Befehl",
+              "EVENT": "Ereignis",
+              "IVEO": "Iveo",
+              "COMMEO": "Commeo",
+              "FIRMWARE": "Firmware"
+            }
+          },
+        "state": {
+            "options": {
+                "UNKOWN": "Unbekannt",
+                "STOPPED_OFF": "Gestoppt/Aus",
+                "UP_ON": "Auffahrt",
+                "DOWN_ON": "Abfahrt"
+            }
+        },
+        "command": {
+            "options": {
+                "FORCED": "Dieser Typ zwingt einen Aktor das Kommando durchzuführen, auch wenn er z.B. keine Endlagen eingestellt hat, oder in einem Alarmzustand steht. HINWEIS: Dieser Typ sollte in der normalen Bedienung nicht verwendet werden. Eine falsche Bedienung kann zur Zerstörung der Anlage führen!",
+                "MANUAL": "Dieser Typ wird standardmäßig für Kommandos genutzt. Es symbolisiert die Nutzung eines übliches Bediengeräts, welcher manuelle Kommandos durchführt.",
+                "TIME": "Dieser Typ wird genutzt, wenn die Anwendung automatisch generierte Kommandos sendet. Hierzu gehören Kommandos von Sensoren, Schaltuhren, etc. ist die Automatik im Aktor ausgeschaltet, so werden diese Kommandos nicht durchgeführt.",
+                "GLASS": "Dieser Typ signalisiert dem Aktor, dass der Befehl von einem Glasbruchsensor kommt, so dass der Aktor entsprechend seiner Funktion reagieren kann.",
+                "STOP": "Stoppen der Aktore",
+                "UP": "Auffahrt der Aktore",
+                "DOWN": "Abfahrt der Aktore",
+                "POS1": "Anfahrt der im Aktor eingestellten Zwischenposition 1",
+                "POS2": "Anfahrt der im Aktor eingestellten Zwischenposition 2",
+                "LEARNTELEGRAMSENT": "Learn Telegramm wurde gesendet",
+                "TEACHTELEGRAMSENT": "Teach Telegramm wurde gesendet"
+            }
+        },
+        "config": {
+            "options": {
+                "NONE": " Es ist kein Repeater im iveo System installiert.",
+                "SINGLEREPEAT": "Ein iveo Repeater für eine einfache Weiterleitung ist im iveo System installiert.",
+                "MULTIREPEAT": "Mehrere iveo Repeater für zweifache Weiterleitungen sind im iveo System installiert."
+            }
+        }
+    },
+    "services": {
+        "ping_gateway": {
+            "name": "Pingt das Gateway",
+            "description": "Mit Hilfe der Methode „selve.GW.service.ping“ wird das SELVE USB-RF Gateway auf einfache Weise angesprochen. Dieser Befehl ist ohne Parameter entsprechend kurz, so dass mit Hilfe der Methode ein schnelles, automatisiertes Auffinden des Gateways möglich ist. Als Initialisierungsbefehl kann hier z.B. die Anwendung im Falle mehrerer, vorhandener COM Ports das Gateway schnellstmöglich lokalisieren, ohne dass der Anwender einen COM Port vordefinieren muss."
+        },
+        "gateway_state": {
+            "name": "Holt den Status des Gateways",
+            "description": "Mit Hilfe der Methode „selve.GW.service.getState“ wird der aktuelle Status des Gateways gelesen. Befindet sich der USB Stick z.B. im Bootloader sind nur eingeschränkt Methoden erreichbar – siehe entsprechendes Kapitel unten. Damit die Anwendung einwandfrei funktioniert sollte eine Anwendung stets warten, bis der Status „Ready“ erreicht ist. Während der „StartUp“ Phase sorgt das Gateway für ein automatisierter Abgleich der internen Informationen eingelernter Aktore, so dass am Ende alle verfügbaren Daten aktualisiert sind. Folgende Statusinformationen werden der Anwendung mitgeteilt: Bootloader Der USB Stick befindet sich im Bootloader. Dieser Bereich ist nach dem Neustart für zwei Sekunden aktiv. Wird kein Firmwareupdate durch die Anwendung durchgeführt und wechselt der Zustand nicht, so signalisiert dies eine mögliche fehlerhafte Firmware. In diesem Fall muss ein neues Firmwareupdate gestartet werden. Update Der USB Stick befindet sich im Bootloader und es wird aktiv ein Firmwareupdate durchgeführt. Ein Update muss durch die Anwendung komplett durchgeführt werden, bevor die eigentliche Firmware wieder lauffähig ist. Ein abgebrochenes, bzw. unterbrochenes Firmwareupdate kann jedoch aus dem Bootloader jederzeit neu gestartet werden. StartUp Die eigentliche Firmware ist gestartet und die StartUp Phase läuft. In dieser Zeit holt sich das Gateway alle aktuellen Zustände der eingelernten Aktore. Je nach Anlagengröße kann die StartUp Phase unterschiedliche Zeiten in Anspruch nehmen. Ready Ist die StartUp Phase beendet, so ist das Gateway betriebsbereit und kann verwendet werden. Alle erhaltenen Akturzustände sind auf Stand und können direkt ausgelesen und verwendet werden. Der Ereignismanager ist nun aktiviert und informiert so die Anwendung automatisch über sich ändernde Zustände."
+        },
+        "get_gateway_firmware_version": {
+            "name": "Holt die FW Version des Gateway",
+            "description": "Mit Hilfe der Methode „selve.GW.service.getVersion“ können die aktuellen Versionsinformationen der aktuell installierten Firmware des Gateways gelesen werden. Die Firmwareversion des USB Sticks setzt sich aus 4 Ziffern zusammen, die wie folgt zu interpretieren sind: Part1.Part2.Part3.Revision (z.B. 16.02.03.01) Weiterhin wird die im Stick verwendete Version der SELVE XML Spezifikation angezeigt: Part1.Part2 (z.B. 2.0) HINWEIS Die einzelnen Integerwerte liegen im Gateway als HEX Werte vor, die für eine einheitliche, korrekte Darstellung konvertiert werden sollten."
+        },
+        "get_gateway_serial": {
+            "name": "Holt die Seriennummer des Gateway."
+        },
+        "get_gateway_spec": {
+            "name": "Holt die Specnummer des Gateway."
+        },
+        "reset": {
+            "name": "Resettet das Gateway.",
+            "description": "Mit Hilfe der Methode „selve.GW.service.reset“ kann ein Softwarereset durchgeführt werden. Beim Empfang der Methode wird die entsprechende Antwort der Anwendung gesendet und daraufhin neu gebootet. Diese Methode wird z.B. dazu genutzt um ein Firmwareupdate durchführen zu können. Nach einem Reset sollte die Anwendung stets mit den entsprechend Methoden „selve.GW.service.ping“ und/oder „selve.GW.service.getState“ die gewünschte Bereitschaft abwarten."
+        },
+        "factory_reset_gateway": {
+            "name": "Setzt das Gateway auf den Werkszustand zurück. VORSICHT!",
+            "description": "Mit Hilfe der Methode „selve.GW.service.factoryReset“ kann das SELVE USB-RF Gateway auf den Werkzustand zurückgesetzt werden. Wird dieser Befehl ausgeführt, so werden alle benutzerspezifischen Einstellungen, eingelernten Sender, Aktore, etc. gelöscht."
+        },
+        "set_led": {
+            "name": "Schalte Status LED an oder aus"
+        },
+        "get_led": {
+            "name": "Hole Status der Status LED"
+        },
+        "update_all_devices": {
+            "name": "Aktualisiert alle bekannten Geräte"
+        },
+        "set_forward": {
+            "name": "Ändere Commeo Forwarding",
+            "description": "Mit Hilfe der Methode „selve.GW.param.setForward“ kann das commeo Forwarding im Gateway aktiviert, bzw. deaktiviert werden. Bei aktiviertem Forwarding bedeutet dies, dass das Gateway als zusätzliches Routing Element in einem commeo System agiert. Je nach Anlagensituation kann diese Funktion im Gateway ausgeschaltet werden, da z.B. der Installationsort des Gateways dagegen spricht. Im Werkszustand ist diese Funktion stets eingeschaltet."
+        },
+        "get_forward": {
+            "name": "Hole Commeo Forwarding"
+        },
+        "set_events": {
+            "name": "Ändere Eventmanager Config",
+            "description": "Mit Hilfe der Methode „selve.GW.param.setEvent“ kann der Ereignismanager des Gateways individuell eingestellt werden. Aktivierte Ereignisse sorgen dafür, das Änderungen das Gateway automatisch der Anwendung mitteilt, so dass die Anwendung kein Polling von Statusinformationen durchführen muss. EventDevice Ist die Einstellung aktiviert, so sendet das Gateway automatisch alle Zustandsänderungen der eingelernten Aktore. EventSensor Ist die Einstellung aktiviert, so teilt das Gateway der Anwendung veränderte Sensordaten automatisch mit. EventSender Ist die Einstellung aktiviert, so meldet das Gateway automatisch eingehende Betätigungen eingelernter Sender der Anwendung. Logging Ist die Einstellung aktiviert, so sendet das Gateway mögliche Logs der externen Anwendung. Das Gateway selbst besitzt keinen Speicher für Logs, so dass dies die Anwendung an dieser Stelle übernehmen muss. EventDuty Ist die Einstellung aktiviert, so sendet das Gateway automatisch Veränderungen der Funkressourcennutzung."
+        },
+        "get_events": {
+            "name": "Hole Eventmanager Config"
+        },
+        "get_duty": {
+            "name": "Funkressourcennutzung auslesen",
+            "description": "Mit Hilfe der Methode „selve.GW.param.getDuty“ kann die aktuelle Funkressourcennutzung des Gateways gelesen werden. Aufgrund des genutzten ISM-Bands 868 MHz sorgt das Gateway selbständig dafür die geforderten Richtlinien einzuhalten. Die hier gelesene Auslastung wird in Prozent mitgeteilt. Dieser Wert gibt an, wie groß die aktuelle Auslastung bezogen auf des erlaubten Grenzwerts ist. Eine 100 %ige Auslastung bedeutet, dass der Grenzwert, der nach der Richtlinie erlaubten Funkauslastung, erreicht wurde. "
+        },
+        "get_rf": {
+            "name": "Funkinformationen auslesen"
+        },
+        "device_scan_start": {
+            "name": "Starte Aktorscan"
+        },
+        "device_scan_stop": {
+            "name": "Stoppe Aktorscan"
+        },
+        "device_scan_result": {
+            "name": "Ergebnis des Aktorscans"
+        },
+        "device_save": {
+            "name": "Speichere Aktor im Gateway"
+        },
+        "device_get_ids": {
+            "name": "Lese alle bekannten Aktor-IDs"
+        },
+        "device_get_info": {
+            "name": "Hole Aktorinfo"
+        },
+        "device_get_values": {
+            "name": "Aktualisiere Werte eines Aktors"
+        },
+        "device_set_function": {
+            "name": "Sende Spezialbefehle an Aktoren"
+        },
+        "device_set_label": {
+            "name": "Aktor Label setzen"
+        },
+        "device_set_type": {
+            "name": "Aktor Typ setzen"
+        },
+        "device_delete": {
+            "name": "Aktor löschen"
+        },
+        "device_write_manual": {
+            "name": "Aktor manuell einspeichern",
+            "description": "Mit Hilfe der Methode „selve.GW.device.writeManual“ kann ein Aktor manuell im Gateway hinzugefügt werden. Diese Methode kann im Falle eines Backups genutzt werden. Folgende Randbedinungen sind dabei zu erfüllen, damit das manuelle Einrichten des Aktors durchgeführt wird: 1. Die gewählte AktorID darf nicht bereits vom Gateway genutzt werden. Nur bei nicht genutzter AktorID erlaubt das Gateway ein manuelles Einrichten. 2. Die Funkadresse des Aktors darf im Gateway noch nicht hinter einer anderen AktorID vorliegen. 3. Der Aktor muss in Funkreichweite sein, da während des Einrichtens der Aktor eingelernt und die entsprechenden Daten abgeglichen werden. HINWEIS Die Namen liegen nach Spezifikation im UTF-8 Format vor. Die maximale Länge des Namens darf eine umgerechnete Bytelänge von 23 Byte nicht überschreiten!"
+        },
+        "device_update_values": {
+            "name": "Aktualisiere Werte aller Aktoren"
+        },
+        "device_set_value": {
+            "name": "Setze Wert eines Aktors"
+        },
+        "device_set_target_value": {
+            "name": "Setze Zielwert eines Aktors"
+        },
+        "device_set_state": {
+            "name": "Setze Status eines Aktors"
+        },
+        "device_move_up": {
+            "name": "Bewege Aktor hoch"
+        },
+        "device_move_down": {
+            "name": "Bewege Aktor runter"
+        },
+        "device_move_pos1": {
+            "name": "Bewege Aktor zu Pos1"
+        },
+        "device_move_pos2": {
+            "name": "Bewege Aktor zu Pos2"
+        },
+        "device_move_pos": {
+            "name": "Bewege Aktor zu angegebener Position"
+        },
+        "device_move_stop": {
+            "name": "Stoppe Aktor"
+        },
+        "device_move_step_up": {
+            "name": "Bewege Aktor einen Schritt hoch"
+        },
+        "device_move_step_down": {
+            "name": "Bewege Aktor einen Schritt runter"
+        },
+        "group_read": {
+            "name": "Lese Gruppenkonfiguration"
+        },
+        "group_write": {
+            "name": "Setze Gruppenkonfiguration"
+        },
+        "group_get_ids": {
+            "name": "Lese IDs einer Gruppe"
+        },
+        "group_delete": {
+            "name": "Lösche eine Gruppe"
+        },
+        "group_move_up": {
+            "name": "Fahre eine Gruppe hoch"
+        },
+        "group_move_down": {
+            "name": "Fahre eine Gruppe runter"
+        },
+        "group_stop": {
+            "name": "Stoppe eine Gruppe"
+        },
+        "iveo_set_repeater": {
+            "name": "Setze Repeater Konfiguration"
+        },
+        "iveo_get_repeater": {
+            "name": "Hole Repeater Konfiguration"
+        },
+        "iveo_set_label": {
+            "name": "Setze Label für ein Iveo Gerät"
+        },
+        "iveo_set_type": {
+            "name": "Setze Typ für ein Iveo Gerät"
+        },
+        "iveo_get_type": {
+            "name": "Hole Typ für ein Iveo Gerät"
+        },
+        "iveo_get_ids": {
+            "name": "Setze IDs aller Iveo Geräte"
+        },
+        "iveo_factory_reset": {
+            "name": "Setze einen Iveo Funkkanal auf Werkseinstellungen"
+        },
+        "iveo_teach": {
+            "name": "Iveo Funkkanal einlernen"
+        },
+        "iveo_learn": {
+            "name": "Iveo Aktor Lernbereitschaft starten"
+        },
+        "iveo_command_manual": {
+            "name": "Schicke manuelles Kommando an mehrere Iveo Aktoren"
+        },
+        "iveo_command_automatic": {
+            "name": "Schicke automatisches Kommando an mehrere Iveo Aktoren"
+        },
+        "sensor_teach_start": {
+            "name": "Startet einen neuen Einlernprozess eines commeo Sensors."
+        },
+        "sensor_teach_stop": {
+            "name": "Stoppt einen laufenden Sensor-Einlernprozess"
+        },
+        "sensor_teach_result": {
+            "name": "Liefert den aktuellen Fortschritt des Sensor-Einlernprozesses."
+        },
+        "sensor_get_ids": {
+            "name": "Lesen einer Bitmaske, die beschreibt welche SensorIDs aktuell genutzt werden."
+        },
+        "sensor_get_info": {
+            "name": "Auslesen der Sensorinformationen"
+        },
+        "sensor_get_values": {
+            "name": "Lesen der aktuellen Werte des Sensors"
+        },
+        "sensor_set_label": {
+            "name": "Setzen eines Labels für den Sensor"
+        },
+        "sensor_delete": {
+            "name": "Löscht einen Sensor aus der Liste"
+        },
+        "sensor_write_manual": {
+            "name": "Manuelles schreiben eines Sensors in die Liste"
+        },
+        "sensor_update_values": {
+            "name": "Aktualisiere alle Sensorwerte"
+        },
+        "sender_teach_start": {
+            "name": "Startet einen Einlernprozess eines commeo Senders."
+        },
+        "sender_teach_stop": {
+            "name": "Stoppt einen laufenden Sender-Lernprozess."
+        },
+        "sender_teach_result": {
+            "name": "Liefert den aktuellen Fortschritt des Sender-Lernprozesses."
+        },
+        "sender_get_ids": {
+            "name": "Lesen einer Bitmaske, die beschreibt welche SenderIDs aktuell genutzt werden."
+        },
+        "sender_get_info": {
+            "name": "Auslesen der Senderinformationen."
+        },
+        "sender_get_values": {
+            "name": "Lesen der aktuellen Werte des Senders."
+        },
+        "sender_set_label": {
+            "name": "Setzen eines Labels für den Sender."
+        },
+        "sender_delete": {
+            "name": "Löscht einen Sender aus der Liste"
+        },
+        "sender_write_manual": {
+            "name": "Manuelles Schreiben eines Senders in die Liste"
+        },
+        "sender_update_values": {
+            "name": "Aktualisiere alle Senderwerte"
+        }
     }
 }

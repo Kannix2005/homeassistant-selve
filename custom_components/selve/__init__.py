@@ -1217,18 +1217,6 @@ class SelveGateway(object):
             "state": True,
         }
     
-
-
-
-
-
-
-
-
-
-
-
-
     async def reset(
             self, service: ServiceCall
     ) -> None:
@@ -1242,6 +1230,16 @@ class SelveGateway(object):
         """Set LED"""
         state = service.data["state"]
         await self.controller.setLED(state)
+        response = await self.controller.getLED()
+
+        return {
+            "state": response.ledmode,
+        }
+    
+    async def get_led(
+            self, service: ServiceCall
+    ) -> ServiceResponse:
+        """Set LED"""
         response = await self.controller.getLED()
 
         return {

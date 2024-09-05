@@ -29,7 +29,6 @@
     },
     "selector": {
         "function": {
-            
           "options":{
             "SELECT": "Do a signalization drive",
             "INSTALL": "Restart install mode",
@@ -42,6 +41,378 @@
             "KEYRELEASE": "Release key press",
             "DRIVESTOP": "Stop the actor"
           }
+        },
+        
+        "type": {
+            "options":{
+              "UNKNOWN": "Unknown",
+              "SHUTTER": "Shutter",
+              "BLIND": "Blind",
+              "AWNING": "Awning",
+              "SWITCH": "Switch",
+              "DIMMER": "Dimmer",
+              "NIGHT_LIGHT": "Night light",
+              "DRAWN_LIGHT": "Drawn light",
+              "HEATING": "Heating",
+              "COOLING": "Cooling",
+              "SERVICE": "Service",
+              "PARAM": "Parameter",
+              "DEVICE": "Device",
+              "SENSOR": "Sensor",
+              "SENSIM": "Sensor simulation",
+              "SENDER": "Sender",
+              "GROUP": "Group",
+              "COMMAND": "Command",
+              "EVENT": "Event",
+              "IVEO": "Iveo",
+              "COMMEO": "Commeo",
+              "FIRMWARE": "Firmware"
+            }
+          },
+        "state": {
+            "options": {
+                "UNKOWN": "Unknown",
+                "STOPPED_OFF": "Stopped/Off",
+                "UP_ON": "Up",
+                "DOWN_ON": "Down"
+            }
+        },
+        "command": {
+            "options": {
+              "FORCED": "This type forces an actuator to execute the command, even if, for example, it has not set any end positions or is in an alarm state. NOTE: This type should not be used in normal operation. Incorrect operation can lead to the destruction of the system!",
+              "MANUAL": "This type is used as standard for commands. It symbolizes the use of a standard operating device that performs manual commands.",
+              "TIME": "This type is used when the application sends automatically generated commands. This includes commands from sensors, timers, etc. If the automatic function in the actuator is switched off, these commands are not executed.",
+              "GLASS": "This type signals to the actuator that the command comes from a glass breakage sensor so that the actuator can react according to its function.",
+              "STOP": "Stopping the actuators",
+              "UP": "Upward movement of the actuators",
+              "DOWN": "Departure of the actuators",
+              "POS1": "Move to the intermediate position 1 set in the actuator",
+              "POS2": "Move to intermediate position 2 set in the actuator",
+              "LEARNTELEGRAMSENT": "Learn telegram was sent",
+              "TEACHELEGRAMSENT": "Teach telegram was sent"
+            }
+        },
+        "config": {
+            "options": {
+                "NONE": "No repeater is installed in the iveo system.",
+                "SINGLEREPEAT": "An iveo repeater for simple forwarding is installed in the iveo system.",
+                "MULTIREPEAT": "Several iveo repeaters for dual forwarding are installed in the iveo system."
+            }
+        }
+    },
+    "services": {
+        "ping_gateway": {
+            "name": "Ping GW",
+            "description": "Pings the gateway - The 'selve.GW.service.ping' method is used to address the SELVE USB-RF gateway in a simple way. This command is correspondingly short without parameters so that the method can be used to find the gateway quickly and automatically. As an initialization command, the application can, for example, locate the gateway as quickly as possible if several COM ports are available, without the user having to predefine a COM port."        
+        },
+        "gateway_state": {
+            "name": "GW State",
+            "description": "Get the status of the gateway - The current status of the gateway is read using the “selve.GW.service.getState” method. If the USB stick is in the bootloader, for example, only limited methods are available - see the corresponding section below. To ensure that the application functions properly, an application should always wait until the “Ready” status is reached. During the “StartUp” phase, the gateway automatically synchronizes the internal information of taught-in actuators so that all available data is updated at the end. The following status information is communicated to the application: Bootloader The USB stick is in the bootloader. This area is active for two seconds after the restart. If no firmware update is carried out by the application and the status does not change, this indicates that the firmware may be faulty. In this case, a new firmware update must be started. Update The USB stick is in the bootloader and a firmware update is actively being carried out. An update must be carried out completely by the application before the actual firmware can be run again. However, an aborted or interrupted firmware update can be restarted from the bootloader at any time. StartUp The actual firmware is started and the StartUp phase is running. During this time, the gateway retrieves all the current statuses of the taught-in actuators. Depending on the size of the system, the start-up phase can vary."
+        },
+        "get_gateway_firmware_version": {
+            "name": "GW Firmware Version",
+            "description": "Get the FW version of the gateway - Using the “selve.GW.service.getVersion” method, the current version information of the currently installed firmware of the gateway can be read. The firmware version of the USB stick is made up of 4 digits, which are to be interpreted as follows: Part1.Part2.Part3.Revision (e.g. 16.02.03.01) The version of the SELVE XML specification used in the stick is also displayed: Part1.Part2 (e.g. 2.0) NOTE The individual integer values are available in the gateway as HEX values, which should be converted for a uniform, correct display."
+        },
+        "get_gateway_serial": {
+            "name": "GW Serial",
+            "description": "Retrieves the serial number of the gateway."
+        },
+        "get_gateway_spec": {
+            "name": "GW Spec",
+            "description": "Retrieves the spec number of the gateway."
+        },
+        "reset": {
+            "name": "Reset GW",
+            "description": "Resets the gateway. - A software reset can be carried out using the “selve.GW.service.reset” method. When the method is received, the corresponding response from the application is sent and then rebooted. This method is used, for example, to carry out a firmware update. After a reset, the application should always wait for the desired readiness using the corresponding methods “selve.GW.service.ping” and/or “selve.GW.service.getState”."
+        },
+        "factory_reset_gateway": {
+            "name": "Werksreset GW",
+            "description":
+             "ATTENTION - Resets the gateway to the factory settings. The SELVE USB-RF Gateway can be reset to the factory settings using the “selve.GW.service.factoryReset” method. If this command is executed, all user-specific settings, programmed transmitters, actuators, etc. are deleted."
+        },
+        "set_led": {
+            "name": "LED GW",
+            "description": "Turns the status LED on or off"
+        },
+        "get_led": {
+            "name": "Get LED GW",
+            "description": "Get the state of the status LED"
+        },
+        "update_all_devices": {
+            "name": "Update All",
+            "description": "Update all known devices"
+        },
+        "set_forward": {
+            "name": "Set Forward",
+            "description": "Set commeo forwarding - The “selve.GW.param.setForward” method can be used to activate or deactivate commeo forwarding in the gateway. If forwarding is activated, this means that the gateway acts as an additional routing element in a commeo system. Depending on the system situation, this function can be switched off in the gateway, e.g. because the installation location of the gateway is against it. This function is always switched on in the factory settings."
+        },
+        "get_forward": {
+            "name": "Get Forward",
+            "description": "Get Commeo Forwarding"
+        },
+        "set_events": {
+            "name": "Set Events",
+            "description": "Change event manager config - The gateway's event manager can be set individually using the “selve.GW.param.setEvent” method. Activated events ensure that the gateway automatically notifies the application of changes so that the application does not have to poll for status information. EventDevice If the setting is activated, the gateway automatically sends all status changes of the taught-in actuators. EventSensor If the setting is activated, the gateway automatically informs the application of any changes in sensor data. EventSender If the setting is activated, the gateway automatically reports incoming actuations of taught-in transmitters to the application. Logging If the setting is activated, the gateway sends possible logs from the external application. The gateway itself has no memory for logs, so this must be done by the application at this point. EventDuty If the setting is activated, the gateway automatically sends changes in radio resource usage."
+        },
+        "get_events": {
+            "name": "Get Events",
+            "description": "Get Eventmanager Config"
+        },
+        "get_duty": {
+            "name": "Get Duty",
+            "description": "Read radio resource usage - The current radio resource usage of the gateway can be read using the “selve.GW.param.getDuty” method. Due to the 868 MHz ISM band used, the gateway automatically ensures that the required guidelines are adhered to. The utilization read here is reported as a percentage. This value indicates how high the current utilization is in relation to the permitted limit value. A 100 % utilization means that the limit value of the permitted radio utilization according to the guideline has been reached. "
+        },
+        "get_rf": {
+            "name": "Get RF",
+            "description": "Get RF info"
+        },
+        "device_scan_start": {
+            "name": "Scan devices Start",
+            "description": "Start scanning for devices"
+        },
+        "device_scan_stop": {
+            "name": "Scan devices Stop",
+            "description": "Stop scanning for devices"
+        },
+        "device_scan_result": {
+            "name": "Scan devices Status",
+            "description": "Get scan results"
+        },
+        "device_save": {
+            "name": "Save device",
+            "description": "Save found device(s) in gateway"
+        },
+        "device_get_ids": {
+            "name": "Get device ids",
+            "description": "Get all known device ids"
+        },
+        "device_get_info": {
+            "name": "Get device info",
+            "description": "Get device info"
+        },
+        "device_get_values": {
+            "name": "Get device values",
+            "description": "Update device values"
+        },
+        "device_set_function": {
+            "name": "Set device function",
+            "description": "Send a special command to a device"
+        },
+        "device_set_label": {
+            "name": "Set device label",
+            "description": "Set device label"
+        },
+        "device_set_type": {
+            "name": "Set device type",
+            "description": "Set device type"
+        },
+        "device_delete": {
+            "name": "Delete device",
+            "description": "Delete device"
+        },
+        "device_write_manual": {
+            "name": "Write device manual",
+            "description": "Save actuator manually - An actuator can be added manually to the gateway using the “selve.GW.device.writeManual” method. This method can be used in the event of a backup. The following conditions must be met in order for the actuator to be set up manually: 1. the selected actuator ID must not already be used by the gateway. The gateway only allows manual setup if the actuator ID is not used. 2. the radio address of the actuator must not yet exist in the gateway behind another actuator ID. 3. the actuator must be within radio range, as the actuator is taught-in and the corresponding data is synchronized during setup. NOTE The names are in UTF-8 format according to the specification. The maximum length of the name must not exceed a converted byte length of 23 bytes!"
+        },
+        "device_update_values": {
+            "name": "Update device values",
+            "description": "Update device values"
+        },
+        "device_set_value": {
+            "name": "Set device value",
+            "description": "Set device value"
+        },
+        "device_set_target_value": {
+            "name": "Set device target value",
+            "description": "Set device target value"
+        },
+        "device_set_state": {
+            "name": "Set device state",
+            "description": "Set device state"
+        },
+        "device_move_up": {
+            "name": "Move device up",
+            "description": "Move device up"
+        },
+        "device_move_down": {
+            "name": "Move device down",
+            "description": "Move device down"
+        },
+        "device_move_pos1": {
+            "name": "Move device Pos1",
+            "description": "Move device to Pos1"
+        },
+        "device_move_pos2": {
+            "name": "Move device Pos2",
+            "description": "Move device to Pos2"
+        },
+        "device_move_pos": {
+            "name": "Move device Pos",
+            "description": "Move device to position"
+        },
+        "device_move_stop": {
+            "name": "Stop device",
+            "description": "Stop device"
+        },
+        "device_move_step_up": {
+            "name": "Move device step up",
+            "description": "Move device one step up"
+        },
+        "device_move_step_down": {
+            "name": "Move device step down",
+            "description": "Move device one step down"
+        },
+        "group_read": {
+            "name": "Group read",
+            "description": "Read group configuration"
+        },
+        "group_write": {
+            "name": "Group write",
+            "description": "Write group configuration"
+        },
+        "group_get_ids": {
+            "name": "Group get ids",
+            "description": "Get IDs of a group"
+        },
+        "group_delete": {
+            "name": "Delete group",
+            "description": "Delete a group"
+        },
+        "group_move_up": {
+            "name": "Move group up",
+            "description": "Move group up"
+        },
+        "group_move_down": {
+            "name": "Move group down",
+            "description": "Move group down"
+        },
+        "group_stop": {
+            "name": "Stop group",
+            "description": "Stop group"
+        },
+        "iveo_set_repeater": {
+            "name": "Iveo set repeater",
+            "description": "Iveo set repeater configuration"
+        },
+        "iveo_get_repeater": {
+            "name": "Iveo get repeater",
+            "description": "Iveo get repeater configuration"
+        },
+        "iveo_set_label": {
+            "name": "Iveo set label",
+            "description": "Iveo set label for a device"
+        },
+        "iveo_set_type": {
+            "name": "Iveo set type",
+            "description": "Iveo set type for a device"
+        },
+        "iveo_get_type": {
+            "name": "Iveo get type",
+            "description": "Iveo get type for a device"
+        },
+        "iveo_get_ids": {
+            "name": "Iveo get ids",
+            "description": "Iveo get ids of all devices"
+        },
+        "iveo_factory_reset": {
+            "name": "Iveo factory reset",
+            "description": "Iveo factory reset"
+        },
+        "iveo_teach": {
+            "name": "Iveo teach",
+            "description": "Iveo teach a channel"
+        },
+        "iveo_learn": {
+            "name": "Iveo learn",
+            "description": "Start Iveo device learning readiness"
+        },
+        "iveo_command_manual": {
+            "name": "Iveo command manual",
+            "description": "Send manual command to multiple Iveo actuators"
+        },
+        "iveo_command_automatic": {
+            "name": "Iveo command automatic",
+            "description": "Send automatic command to multiple Iveo actuators"
+        },
+        "sensor_teach_start": {
+            "name": "Sensor teach start",
+            "description": "Starts a new teach-in process for a commeo sensor."
+        },
+        "sensor_teach_stop": {
+            "name": "Sensor teach stop",
+            "description": "Stops a running sensor teach-in process"
+        },
+        "sensor_teach_result": {
+            "name": "Sensor teach result",
+            "description": "Provides the current progress of the sensor teach-in process."
+        },
+        "sensor_get_ids": {
+            "name": "Sensor get ids",
+            "description": "Reading a bit mask that describes which SensorIDs are currently being used."
+        },
+        "sensor_get_info": {
+            "name": "Sensor get info",
+            "description": "Reading out the sensor information"
+        },
+        "sensor_get_values": {
+            "name": "Sensor get values",
+            "description": "Read the current values of the sensor"
+        },
+        "sensor_set_label": {
+            "name": "Sensor set label",
+            "description": "Setting a label for the sensor"
+        },
+        "sensor_delete": {
+            "name": "Sensor delete",
+            "description": "Deletes a sensor from the list"
+        },
+        "sensor_write_manual": {
+            "name": "Sensor write manual",
+            "description": "Manually writing a sensor to the list"
+        },
+        "sensor_update_values": {
+            "name": "Sensor update values",
+            "description": "Update all sensor values"
+        },
+        "sender_teach_start": {
+            "name": "Sender teach start",
+            "description": "Starts a teach-in process for a commeo transmitter."
+        },
+        "sender_teach_stop": {
+            "name": "Sender teach stop",
+            "description": "Stops an ongoing sender learning process."
+        },
+        "sender_teach_result": {
+            "name": "Sender teach result",
+            "description": "Provides the current progress of the sender learning process."
+        },
+        "sender_get_ids": {
+            "name": "Sender get ids",
+            "description": "Reading a bit mask that describes which SenderIDs are currently being used."
+        },
+        "sender_get_info": {
+            "name": "Sender get info",
+            "description": "Sender get info"
+        },
+        "sender_get_values": {
+            "name": "Sender get values",
+            "description": "Sender get values"
+        },
+        "sender_set_label": {
+            "name": "Sender set label",
+            "description": "Sender set label"
+        },
+        "sender_delete": {
+            "name": "Sender delete",
+            "description": "Sender delete"
+        },
+        "sender_write_manual": {
+            "name": "Sender write manual",
+            "description": "Manually writing a sender to the list"
+        },
+        "sender_update_values": {
+            "name": "Sender update values",
+            "description": "Sender update values"
         }
     }
 }

@@ -61,7 +61,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     selvegat = SelveGateway(hass, entry)
     
     hass.data[DOMAIN][port] = selvegat
-    await selvegat.async_setup()
+    try:
+        await selvegat.async_setup()
+    except Exception as ex:
+        raise PlatformNotReady(f"Connection error while connecting to {port}: {ex}") from ex
     return True
 
  

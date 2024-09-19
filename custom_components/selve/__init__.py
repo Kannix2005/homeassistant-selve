@@ -166,15 +166,8 @@ class SelveGateway(object):
         self.controller.register_event_callback(self._event_callback)
 
         hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(self.config_entry, "cover")
+            hass.config_entries.async_forward_entry_setups(self.config_entry, ["cover", "binary_sensor"])
         )
-
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(
-                self.config_entry, "binary_sensor"
-            )
-        )
-
 
         # Gateway
         hass.services.async_register(DOMAIN, 'ping_gateway', self.ping_gateway, supports_response=SupportsResponse.OPTIONAL)

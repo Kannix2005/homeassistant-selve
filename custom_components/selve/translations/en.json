@@ -4,12 +4,21 @@
         "step": {
             "user": {
                 "description": "Please connect your Selve USB Stick to your system. The plugin will try to auto-detect the port.",
-                "title": "Selve NG Integration Setup"
+                "title": "Selve NG Integration Setup",
+                "data": {
+                    "autodiscovery": "Autodiscovery",
+                    "port": "Port"
+                },
+                "data_description": {
+                    "autodiscovery": "Discover port automatically",
+                    "port": "Manually chosen port"
+                }
             }
         },
         "error": {
             "gateway_not_ready": "Gateway seems to be not ready. Is it properly connected?",
-            "invalid_port": "Port seems to be incorrect or no gateway found."
+            "invalid_port": "Port seems to be incorrect or no gateway found.",
+            "unknown": "Unknown error."
         },
         "abort": {
             "already_configured": "Device is already configured.",

@@ -36,28 +36,85 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         data = {}
 
-        try:
-            gateway = Selve(None, discover=False, logger=_LOGGER)
-            await gateway.setup(discover=False, fromConfigFlow=True)
-            data[CONF_PORT] = gateway._port
-            return self.async_create_entry(title="Selve Gateway", data=data)
+        if user_input is not None:
+            if user_input["autodicovery"] is True:
+                try:
+                    gateway = Selve(None, discover=False, logger=_LOGGER)
+                    await gateway.setup(discover=False, fromConfigFlow=True)
+                    data[CONF_PORT] = gateway._port
+                    return self.async_create_entry(title="Selve Gateway", data=data)
+                except PortError:
+                    _LOGGER.exception("Invalid port")
+                    errors["base"] = "invalid_port"
 
-        except GatewayNotReadyError:
-            _LOGGER.exception("Gateway not ready")
-            errors["base"] = "gateway_not_ready"
-        except PortError:
-            _LOGGER.exception("Invalid port")
-            errors["base"] = "invalid_port"
-        except ConnectionFailedError:
-            _LOGGER.exception("Invalid port")
-            errors["base"] = "invalid_port"
-        except AlreadyConfigured:
-            return self.async_abort(reason="already_configured")
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors["base"] = "unknown"
+                except ConnectionFailedError:
+                    _LOGGER.exception("Invalid port")
+                    errors["base"] = "invalid_port"
 
-        return self.async_show_form(step_id="user", errors=errors)
+                except AlreadyConfigured:
+                    return self.async_abort(reason="already_configured")
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
+
+                except GatewayNotReadyError:
+                    _LOGGER.exception("Gateway not ready")
+                    errors["base"] = "gateway_not_ready"
+
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
+
+            else:
+                try:
+                    gateway = Selve(None, discover=False, logger=_LOGGER)
+                    
+                    if await gateway.check_port(user_input[CONF_PORT]):
+                        gateway = Selve(user_input[CONF_PORT], discover=False, logger=_LOGGER)
+                        await gateway.setup(discover=False, fromConfigFlow=True)
+                        data[CONF_PORT] = user_input[CONF_PORT]
+                        return self.async_create_entry(title="Selve Gateway", data=data)
+                    else:    
+                        _LOGGER.exception("Invalid port")
+                        errors["base"] = "invalid_port"
+
+                except PortError:
+                    _LOGGER.exception("Invalid port")
+                    errors["base"] = "invalid_port"
+
+                except ConnectionFailedError:
+                    _LOGGER.exception("Invalid port")
+                    errors["base"] = "invalid_port"
+
+                except AlreadyConfigured:
+                    return self.async_abort(reason="already_configured")
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
+
+                except GatewayNotReadyError:
+                    _LOGGER.exception("Gateway not ready")
+                    errors["base"] = "gateway_not_ready"
+
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception("Unexpected exception")
+                    errors["base"] = "unknown"
+
+
+
+        gateway = Selve(None, discover=False, logger=_LOGGER)
+        ports = gateway.list_ports()
+        list = []
+        list.append("None")
+        for p in ports:
+            list.append(p.device)
+        data_schema = {
+            vol.Required("autodiscovery", default=True): bool,
+            vol.Optional(CONF_PORT): vol.In(list),
+        }
+
+        return self.async_show_form(step_id="user", errors=errors, data_schema=vol.Schema(data_schema))
+
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):

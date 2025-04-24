@@ -37,7 +37,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data = {}
 
         if user_input is not None:
-            if user_input["autodicovery"] is True:
+            if user_input["autodiscovery"] is True:
                 try:
                     gateway = Selve(None, discover=False, logger=_LOGGER)
                     await gateway.setup(discover=False, fromConfigFlow=True)
@@ -110,7 +110,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             list.append(p.device)
         data_schema = {
             vol.Required("autodiscovery", default=True): bool,
-            vol.Optional(CONF_PORT): vol.In(list),
+            vol.Optional(CONF_PORT, default="None"): vol.In(list),
         }
 
         return self.async_show_form(step_id="user", errors=errors, data_schema=vol.Schema(data_schema))

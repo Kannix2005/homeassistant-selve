@@ -4,12 +4,21 @@
         "step": {
             "user": {
                 "description": "Bitte den Selve USB Stick anschließen. Die Integration versucht diesen automatisch zu erkennen.",
-                "title": "Selve NG Integration Setup"
+                "title": "Selve NG Integration Setup",
+                "data": {
+                    "autodiscovery": "Autodiscovery",
+                    "port": "Port"
+                },
+                "data_description": {
+                    "autodiscovery": "Port automatisch erkennen",
+                    "port": "Zu verwendender Port"
+                }
             }
         },
         "error": {
             "gateway_not_ready": "Das Gateway scheint nicht den Status 'ready' zu haben. Ist der Stick korrekt angeschlossen?",
-            "invalid_port": "Stick nicht gefunden oder falscher Port angegeben."
+            "invalid_port": "Stick nicht gefunden oder falscher Port angegeben.",
+            "unknown": "Unbekannter Fehler."
         },
         "abort": {
             "already_configured": "Gateway ist bereits konfiguriert.",

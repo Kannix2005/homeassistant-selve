@@ -1,21 +1,20 @@
 """Config flow for selvetest integration."""
+
 from __future__ import annotations
-from collections import OrderedDict
 
 import logging
 from typing import Any
 
 import voluptuous as vol
 
-from homeassistant import config_entries, core, exceptions
-from homeassistant.core import HomeAssistant, callback
+from homeassistant import config_entries
+from homeassistant.const import CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
-from selve import *
-from selve.util.errors import *
+from selve import Selve
+from selve.util.errors import PortError
 
 from .const import DOMAIN
-from homeassistant.const import CONF_PORT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def async_get_options_flow(config_entry):
         return OptionsFlowHandler(config_entry)
-    
+
     async def async_step_user(self, user_input=None):
         """Give initial instructions for setup."""
 
@@ -68,17 +67,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 try:
                     gateway = Selve(None, discover=False, logger=_LOGGER)
-                    
-                    if user_input[CONF_PORT] is "None":
+
+                    if user_input[CONF_PORT] == "None":
                         _LOGGER.exception("Invalid port")
                         errors["base"] = "invalid_port"
                     else:
                         if await gateway.check_port(user_input[CONF_PORT]):
-                            gateway = Selve(user_input[CONF_PORT], discover=False, logger=_LOGGER)
+                            gateway = Selve(
+                                user_input[CONF_PORT], discover=False, logger=_LOGGER
+                            )
                             await gateway.setup(discover=False, fromConfigFlow=True)
                             data[CONF_PORT] = user_input[CONF_PORT]
-                            return self.async_create_entry(title="Selve Gateway", data=data)
-                        else:    
+                            return self.async_create_entry(
+                                title="Selve Gateway", data=data
+                            )
+                        else:
                             _LOGGER.exception("Invalid port")
                             errors["base"] = "invalid_port"
 
@@ -104,12 +107,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     _LOGGER.exception("Unexpected exception")
                     errors["base"] = "unknown"
 
-
-
-        gateway = Selve(None, discover=False, logger=_LOGGER)
-        ports = gateway.list_ports()
         list = []
         list.append("None")
+        gateway = Selve(None, discover=False, logger=_LOGGER)
+        ports = gateway.list_ports()
         for p in ports:
             list.append(p.device)
         data_schema = {
@@ -117,12 +118,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_PORT, default="None"): vol.In(list),
         }
 
-        return self.async_show_form(step_id="user", errors=errors, data_schema=vol.Schema(data_schema))
-
+        return self.async_show_form(
+            step_id="user", errors=errors, data_schema=vol.Schema(data_schema)
+        )
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry

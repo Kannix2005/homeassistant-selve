@@ -190,7 +190,7 @@ class SelveCover(CoverEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, self.controller._port),
+            via_device=(DOMAIN, str(self.controller._port)),
         )
 
     @property

@@ -15,6 +15,7 @@ from homeassistant.core import callback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers import device_registry
 
 DEPENDENCIES = ["selve"]
 
@@ -78,11 +79,11 @@ async def async_setup_entry(
 
 class SelveSensor(BinarySensorEntity):
     def __init__(
-        self, device, controller, description: BinarySensorEntityDescription
+        self, device, selve, description: BinarySensorEntityDescription
     ) -> None:
         self.selve_device = device
         self._name = f"{str(self.selve_device.name)}  {description.name}"
-        self.controller = controller
+        self.selve = selve
         self.description = description
 
         self._unit_of_measurement = None
@@ -90,11 +91,11 @@ class SelveSensor(BinarySensorEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
-        self.controller.register_callback(self.async_write_ha_state)
+        self.selve.register_callback(self.async_write_ha_state)
 
     async def async_will_remove_from_hass(self) -> None:
         """Entity being removed from hass."""
-        self.controller.remove_callback(self.async_write_ha_state)
+        self.selve.remove_callback(self.async_write_ha_state)
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -112,7 +113,7 @@ class SelveSensor(BinarySensorEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=(DOMAIN, self.controller._port),
+            via_device=device_registry.get_device(self.selve.via_device_id),
         )
 
     @property

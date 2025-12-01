@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers import device_registry
+from .const import DOMAIN
 
 DEPENDENCIES = ["selve"]
 
@@ -113,7 +114,7 @@ class SelveSensor(BinarySensorEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=self.selve.via_device,
+            via_device=(DOMAIN, self.selve.gateway_id),
         )
 
     @property

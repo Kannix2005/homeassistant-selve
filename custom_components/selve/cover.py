@@ -23,6 +23,7 @@ from homeassistant.helpers import device_registry
 from homeassistant.const import ATTR_ENTITY_ID
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from .const import DOMAIN
 
 DEPENDENCIES = ["selve"]
 
@@ -190,7 +191,7 @@ class SelveCover(CoverEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType,
             sw_version=1,
-            via_device=self.selve.via_device,
+            via_device=(DOMAIN, self.selve.gateway_id),
         )
 
     @property

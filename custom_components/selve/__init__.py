@@ -161,6 +161,7 @@ class SelveGateway(object):
             hw_version="1",
         )
         self.controller.via_device = gatRegistry
+        self.controller.gateway_id = self.gatewayId
         self.config_entry.async_on_unload(self.config_entry.add_update_listener(self.update_listener))
 
         self.controller.register_event_callback(self._event_callback)

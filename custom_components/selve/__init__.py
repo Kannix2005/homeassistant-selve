@@ -148,7 +148,7 @@ class SelveGateway(object):
         self.gatewayFW = await self.controller.getGatewayFirmwareVersion()
 
         device_registry = dr.async_get(hass)
-        device_registry.async_get_or_create(
+        gatRegistry = device_registry.async_get_or_create(
             config_entry_id=self.config_entry.entry_id,
             connections={},
             identifiers={(DOMAIN, self.gatewayId)},
@@ -160,7 +160,7 @@ class SelveGateway(object):
             sw_version=self.gatewayFW,
             hw_version="1",
         )
-
+        self.controller.via_device_id = gatRegistry.id
         self.config_entry.async_on_unload(self.config_entry.add_update_listener(self.update_listener))
 
         self.controller.register_event_callback(self._event_callback)

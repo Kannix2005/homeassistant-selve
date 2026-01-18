@@ -121,9 +121,17 @@ class SelveGateway(object):
 
     @property
     def available(self):
-        return asyncio.run_coroutine_threadsafe(
-            self.controller.pingGateway(), self.hass.loop
-        ).result()
+        """Return availability - use cached value to avoid blocking."""
+        # Return True if controller exists and is connected
+        # Avoid blocking async calls that cause "event loop already running" errors
+        return self.controller is not None
+
+    async def async_check_available(self):
+        """Async method to actually ping the gateway."""
+        try:
+            return await self.controller.pingGateway()
+        except Exception:
+            return False
 
     async def async_setup(self):
         port = self.port

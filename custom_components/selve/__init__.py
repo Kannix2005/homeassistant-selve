@@ -488,6 +488,7 @@ class SelveGateway(object):
         response = await self.controller.deviceGetInfo(id)
 
         return {
+            "name": response.name,
             "rfAddress": response.rfAddress,
             "deviceType": response.deviceType,
             "state": response.state,

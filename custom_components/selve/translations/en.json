@@ -31,7 +31,10 @@
             "title": "Selve options",
             "description": "",
             "data": {
-              "switch_dir": "Reverse the current state value of covers (open is now 0%)"
+              "open_close_fix": "Open/Close Fix"
+            },
+            "data_description": {
+              "open_close_fix": "Clamp cover positions near boundaries: values 0-1% are reported as fully closed (0%) and 99-100% as fully open (100%). Useful when covers report 99 instead of 100 when fully open, or 1 instead of 0 when fully closed."
             }
           }
         }

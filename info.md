@@ -11,7 +11,7 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 - Device, sensor, sender, and senSim management
 - Group and Iveo controller support
 - Position control with tilt support for Commeo devices
-- Option to invert cover position semantics
+- Open/Close Fix option for covers that report 99/1 instead of 100/0 at limits
 
 ## Requirements
 - Home Assistant Core/Supervised/OS with access to the Selve USB-RF stick

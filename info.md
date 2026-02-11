@@ -1,11 +1,18 @@
-# homeassistant-selve
-Home Assistant Custom component to manage Selve devices
+# Selve NG – Home Assistant Integration
 
+Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `python-selve-new`.
 
-It can be used with the [python-selve library](https://github.com/Kannix2005/python-selve) and a usb-rtf gateway.
-Just plug a gateway on the same pc where Home assistant is running, check for the usb interface and follow the configuration steps of the component.
+## Features
+- Direct USB control, no cloud required
+- Cover entities for shutters, blinds, and awnings (Commeo, Iveo, Groups)
+- Auto-discovery of devices and serial ports
+- 99 services covering the complete Selve USB-RF Gateway protocol
+- Gateway management (firmware, LED, events, duty cycle, RF, forwarding)
+- Device, sensor, sender, and senSim management
+- Group and Iveo controller support
+- Position control with tilt support for Commeo devices
+- Option to invert cover position semantics
 
-This component supports both Iveo and Commeo devices from Selve. 
-
-So far implemented:
-- cover entities
+## Requirements
+- Home Assistant Core/Supervised/OS with access to the Selve USB-RF stick
+- USB port visible to HA (e.g., `/dev/ttyUSB0`)

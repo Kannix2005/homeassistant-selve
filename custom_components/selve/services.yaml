@@ -48,10 +48,38 @@ set_events:
 get_events:
 get_duty:
 get_rf:
+
+set_duty:
+  fields:
+    mode:
+      required: true
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 1
+
+set_rf:
+  fields:
+    net_address:
+      required: true
+      selector:
+        number:
+    reset_count:
+      required: true
+      selector:
+        number:
+
+get_temperature:
 device_scan_start:
 device_scan_stop:
 device_scan_result:
 device_save:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 device_get_ids:
 device_get_info:
   fields:
@@ -434,6 +462,13 @@ device_move_pos:
             - "MANUAL"
             - "TIME"
             - "GLASS"
+    position:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 100
 device_move_stop:
   fields:
     id:
@@ -547,6 +582,55 @@ device_move_step_down:
             - "MANUAL"
             - "TIME"
             - "GLASS"
+device_save_pos1:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: false
+      default: DEVICE
+      selector:
+        select:
+          options:
+            - "DEVICE"
+            - "COMMEO"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+device_save_pos2:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    type:
+      required: false
+      default: DEVICE
+      selector:
+        select:
+          options:
+            - "DEVICE"
+            - "COMMEO"
+    command:
+      required: false
+      default: MANUAL
+      selector:
+        select:
+          options:
+            - "FORCED"
+            - "MANUAL"
+            - "TIME"
+            - "GLASS"
+command_result:
 group_read:
   fields:
     id:
@@ -649,6 +733,14 @@ iveo_set_type:
       required: true
       selector:
         number:
+    activity:
+      required: true
+      description: "0 = channel deactivated, 1 = channel active"
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 1
     type:
       required: true
       default: UNKNOWN
@@ -668,10 +760,30 @@ iveo_set_type:
             - "SWITCHDAY"
             - "GATEWAY"
 iveo_get_type:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 iveo_get_ids:
 iveo_factory_reset:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 iveo_teach:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 iveo_learn:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 iveo_command_manual:
   fields:
     id:
@@ -710,12 +822,23 @@ iveo_command_automatic:
             - "POS2"
             - "LEARNTELEGRAMSENT"
             - "TEACHTELEGRAMSENT"
+iveo_command_result:
 sensor_teach_start:
 sensor_teach_stop:
 sensor_teach_result:
 sensor_get_ids:
 sensor_get_info:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 sensor_get_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
 sensor_set_label:
   fields:
     id:
@@ -813,8 +936,171 @@ sender_update_values:
       selector:
         number:
 
+# SenSim Services
+sensim_get_ids:
+sensim_get_config:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sensim_set_config:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    activity:
+      required: true
+      default: true
+      selector:
+        boolean:
+sensim_get_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sensim_set_values:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    wind_digital:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 2
+    rain_digital:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 2
+    temp_digital:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 3
+    light_digital:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 4
+    temp_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+    wind_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+    sun_1_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+    day_light_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+    sun_2_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+    sun_3_analog:
+      required: false
+      default: 0
+      selector:
+        number:
+sensim_set_label:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    label:
+      required: true
+      selector:
+        text:
+sensim_drive:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    command:
+      required: true
+      default: STOP
+      selector:
+        select:
+          options:
+            - "STOP"
+            - "DRIVEUP"
+            - "DRIVEDOWN"
+            - "POSITION_1"
+            - "POSITION_2"
+sensim_store:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    actor_id:
+      required: true
+      selector:
+        number:
+sensim_delete:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    actor_id:
+      required: true
+      selector:
+        number:
+sensim_factory:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sensim_get_test:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+sensim_set_test:
+  fields:
+    id:
+      required: true
+      selector:
+        number:
+    test_mode:
+      required: true
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 1
 
-# example:
+# Firmware Services
+firmware_get_version:
+firmware_update:
 #   fields:
 #     duration:
 #       default: 60

@@ -1,4 +1,5 @@
 {
   "name": "Selve NG",
-  "domains": ["cover"]
+  "domains": ["cover"],
+  "render_readme": true
 }

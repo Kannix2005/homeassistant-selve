@@ -4,6 +4,7 @@ Support for Selve devices.
 
 from __future__ import annotations
 import asyncio
+
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, callback, ServiceResponse, SupportsResponse
 from .const import DOMAIN
@@ -16,7 +17,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry as dr
 from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse, SenderTeachResultResponse, SensorTeachResultResponse, DeviceScanResultResponse, DeviceFunctions, DeviceType, SelveTypes, MovementState
-from selve import DeviceCommandType, DriveCommandIveo
+from selve import DeviceCommandType, DriveCommandIveo, SenSimCommandType
 
 REQUIREMENTS = ["python-selve-new"]
 PLATFORMS = ["cover"]  # , "switch", "light", "climate"]
@@ -195,6 +196,9 @@ class SelveGateway(object):
         hass.services.async_register(DOMAIN, 'get_events', self.get_events, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'get_duty', self.get_duty, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'get_rf', self.get_rf, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'set_duty', self.set_duty, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'set_rf', self.set_rf, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'get_temperature', self.get_temperature, supports_response=SupportsResponse.OPTIONAL)
 
         #Devices
         hass.services.async_register(DOMAIN, 'device_scan_start', self.device_scan_start, supports_response=SupportsResponse.OPTIONAL)
@@ -221,6 +225,9 @@ class SelveGateway(object):
         hass.services.async_register(DOMAIN, 'device_move_stop', self.device_move_stop, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'device_move_step_up', self.device_move_step_up, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'device_move_step_down', self.device_move_step_down, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'device_save_pos1', self.device_save_pos1, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'device_save_pos2', self.device_save_pos2, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'command_result', self.command_result, supports_response=SupportsResponse.OPTIONAL)
 
         #Group
         hass.services.async_register(DOMAIN, 'group_read', self.group_read, supports_response=SupportsResponse.OPTIONAL)
@@ -243,6 +250,7 @@ class SelveGateway(object):
         hass.services.async_register(DOMAIN, 'iveo_learn', self.iveo_learn, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'iveo_command_manual', self.iveo_command_manual, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'iveo_command_automatic', self.iveo_command_automatic, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'iveo_command_result', self.iveo_command_result, supports_response=SupportsResponse.OPTIONAL)
 
         #Sensor
         hass.services.async_register(DOMAIN, 'sensor_teach_start', self.sensor_teach_start, supports_response=SupportsResponse.OPTIONAL)
@@ -268,6 +276,23 @@ class SelveGateway(object):
         hass.services.async_register(DOMAIN, 'sender_write_manual', self.sender_write_manual, supports_response=SupportsResponse.OPTIONAL)
         hass.services.async_register(DOMAIN, 'sender_update_values', self.sender_update_values, supports_response=SupportsResponse.OPTIONAL)
 
+        #SenSim
+        hass.services.async_register(DOMAIN, 'sensim_get_ids', self.sensim_get_ids, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_get_config', self.sensim_get_config, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_set_config', self.sensim_set_config, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_get_values', self.sensim_get_values, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_set_values', self.sensim_set_values, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_set_label', self.sensim_set_label, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_drive', self.sensim_drive, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_store', self.sensim_store, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_delete', self.sensim_delete, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_factory', self.sensim_factory, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_get_test', self.sensim_get_test, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'sensim_set_test', self.sensim_set_test, supports_response=SupportsResponse.OPTIONAL)
+
+        #Firmware
+        hass.services.async_register(DOMAIN, 'firmware_get_version', self.firmware_get_version, supports_response=SupportsResponse.OPTIONAL)
+        hass.services.async_register(DOMAIN, 'firmware_update', self.firmware_update, supports_response=SupportsResponse.OPTIONAL)
 
         return True
 
@@ -415,7 +440,6 @@ class SelveGateway(object):
         return {
             "dutyMode": response.dutyMode,
             "rfTraffic": response.rfTraffic,
-            "name": response.name,
         }
     
     async def get_rf(
@@ -426,7 +450,6 @@ class SelveGateway(object):
 
         return {
             "iveoResetCount": response.iveoResetCount,
-            "name": response.name,
             "netAddress": response.netAddress,
             "parameters": response.parameters,
             "rfBaseId": response.rfBaseId,
@@ -434,6 +457,39 @@ class SelveGateway(object):
             "sensorNetAddress": response.sensorNetAddress,
             "rfSensorId": response.rfSensorId,
             "resetCount": response.resetCount,
+        }
+    
+    async def set_duty(
+            self, service: ServiceCall
+    ) -> None:
+        """Set duty cycle mode."""
+        mode = int(service.data["mode"])
+        response = await self.controller.setDuty(mode)
+
+        return {
+            "state": response,
+        }
+    
+    async def set_rf(
+            self, service: ServiceCall
+    ) -> None:
+        """Set RF parameters."""
+        net_address = int(service.data["net_address"])
+        reset_count = int(service.data["reset_count"])
+        response = await self.controller.setRF(net_address, reset_count)
+
+        return {
+            "state": response,
+        }
+    
+    async def get_temperature(
+            self, service: ServiceCall
+    ) -> None:
+        """Get gateway temperature."""
+        response = await self.controller.getTemperature()
+
+        return {
+            "temperature": response.temperature,
         }
     
     async def device_scan_start(
@@ -472,7 +528,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.deviceSave()
+        id = int(service.data["id"])
+        response = await self.controller.deviceSave(id)
 
         return {
             "state": response,
@@ -605,7 +662,7 @@ class SelveGateway(object):
         id = int(service.data["id"])
         value = int(service.data["value"])
         type = SelveTypes[service.data["type"]]
-        await self.controller.setDeviceValue(id, value, type)
+        self.controller.setDeviceValue(id, value, type)
 
         return {
             "state": True,
@@ -618,7 +675,7 @@ class SelveGateway(object):
         id = int(service.data["id"])
         value = int(service.data["value"])
         type = SelveTypes[service.data["type"]]
-        await self.controller.setDeviceTargetValue(id, value, type)
+        self.controller.setDeviceTargetValue(id, value, type)
 
         return {
             "state": True,
@@ -631,7 +688,7 @@ class SelveGateway(object):
         id = int(service.data["id"])
         state = MovementState[service.data["state"]]
         type = SelveTypes[service.data["type"]]
-        await self.controller.setDeviceState(id, state, type)
+        self.controller.setDeviceState(id, state, type)
 
         return {
             "state": True,
@@ -703,10 +760,11 @@ class SelveGateway(object):
         """"""
         id = int(service.data["id"])
         type = SelveTypes[service.data["type"]]
-        command = DeviceCommandType[service.data["command"]]
+        command = DeviceCommandType[service.data.get("command", "MANUAL")]
+        position = int(service.data.get("position", 0))
 
         dev = self.controller.getDevice(id, type)
-        await self.controller.moveDevicePos(dev, command)
+        await self.controller.moveDevicePos(dev, position, command)
 
         return {
             "state": True,
@@ -759,6 +817,50 @@ class SelveGateway(object):
             "state": True,
         }
     
+    async def device_save_pos1(
+            self, service: ServiceCall
+    ) -> None:
+        """Save current position as Position 1."""
+        id = int(service.data["id"])
+        type = SelveTypes[service.data.get("type", "DEVICE")]
+        command = DeviceCommandType[service.data.get("command", "MANUAL")]
+
+        dev = self.controller.getDevice(id, type)
+        await self.controller.deviceSavePos1(dev, command)
+
+        return {
+            "state": True,
+        }
+    
+    async def device_save_pos2(
+            self, service: ServiceCall
+    ) -> None:
+        """Save current position as Position 2."""
+        id = int(service.data["id"])
+        type = SelveTypes[service.data.get("type", "DEVICE")]
+        command = DeviceCommandType[service.data.get("command", "MANUAL")]
+
+        dev = self.controller.getDevice(id, type)
+        await self.controller.deviceSavePos2(dev, command)
+
+        return {
+            "state": True,
+        }
+    
+    async def command_result(
+            self, service: ServiceCall
+    ) -> None:
+        """Get result of last command execution."""
+        response = await self.controller.commandResult()
+
+        return {
+            "command": response.command.name if hasattr(response.command, 'name') else str(response.command),
+            "command_type": response.commandType.name if hasattr(response.commandType, 'name') else str(response.commandType),
+            "executed": response.executed,
+            "success_ids": response.successIds,
+            "failed_ids": response.failedIds,
+        }
+    
     async def group_read(
             self, service: ServiceCall
     ) -> None:
@@ -769,7 +871,7 @@ class SelveGateway(object):
         return {
             "id": response.id,
             "mask": response.mask,
-            "name": response.name,
+            "name": response.groupName,
         }
     
     async def group_write(
@@ -779,7 +881,7 @@ class SelveGateway(object):
         id = int(service.data["id"])
         ids = str(service.data["ids"]).split(",")
         iddict = dict(enumerate(ids, start=1))
-        name = int(service.data["name"])
+        name = str(service.data["name"])
         response = await self.controller.groupWrite(id, iddict, name)
 
         return {
@@ -902,8 +1004,9 @@ class SelveGateway(object):
     ) -> None:
         """"""
         id = int(service.data["id"])
+        activity = int(service.data["activity"])
         type = DeviceType[service.data["type"]]
-        response = await self.controller.iveoSetType(id, type)
+        response = await self.controller.iveoSetType(id, activity, type)
 
         return {
             "state": response,
@@ -913,7 +1016,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.iveoGetType()
+        id = int(service.data["id"])
+        response = await self.controller.iveoGetType(id)
 
         return {
             "name": response.name,
@@ -935,7 +1039,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.iveoFactoryReset()
+        id = int(service.data["id"])
+        response = await self.controller.iveoFactoryReset(id)
 
         return {
             "state": response,
@@ -945,7 +1050,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.iveoTeach()
+        id = int(service.data["id"])
+        response = await self.controller.iveoTeach(id)
 
         return {
             "state": response,
@@ -955,7 +1061,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.iveoLearn()
+        id = int(service.data["id"])
+        response = await self.controller.iveoLearn(id)
 
         return {
             "state": response,
@@ -983,6 +1090,18 @@ class SelveGateway(object):
 
         return {
             "state": response,
+        }
+    
+    async def iveo_command_result(
+            self, service: ServiceCall
+    ) -> None:
+        """Get result of last iveo command execution."""
+        response = await self.controller.iveoCommandResult()
+
+        return {
+            "command": response.command.name if hasattr(response.command, 'name') else str(response.command),
+            "state": response.state.name if hasattr(response.state, 'name') else str(response.state),
+            "executed_ids": response.executedIds,
         }
     
     async def sensor_teach_start(
@@ -1031,7 +1150,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.sensorGetInfo()
+        id = int(service.data["id"])
+        response = await self.controller.sensorGetInfo(id)
 
         return {
             "name": response.name,
@@ -1042,7 +1162,8 @@ class SelveGateway(object):
             self, service: ServiceCall
     ) -> None:
         """"""
-        response = await self.controller.sensorGetValues()
+        id = int(service.data["id"])
+        response = await self.controller.sensorGetValues(id)
 
         return {
             "wind_digital": response.windDigital,
@@ -1223,13 +1344,194 @@ class SelveGateway(object):
             "state": True,
         }
     
-    async def reset(
+    # SenSim Services
+
+    async def sensim_get_ids(
             self, service: ServiceCall
     ) -> None:
-        """Reset GW"""
-        return await self.controller.resetGateway()
+        """Get all SenSim IDs."""
+        response = await self.controller.senSimGetIds()
 
+        return {
+            "ids": response.ids,
+        }
+    
+    async def sensim_get_config(
+            self, service: ServiceCall
+    ) -> None:
+        """Get SenSim configuration."""
+        id = int(service.data["id"])
+        response = await self.controller.senSimGetConfig(id)
 
+        return {
+            "name": response.name,
+            "sensim_id": response.senSimId,
+            "activity": response.activity,
+        }
+    
+    async def sensim_set_config(
+            self, service: ServiceCall
+    ) -> None:
+        """Set SenSim configuration (activity)."""
+        id = int(service.data["id"])
+        activity = bool(service.data["activity"])
+        response = await self.controller.senSimSetConfig(id, activity)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_get_values(
+            self, service: ServiceCall
+    ) -> None:
+        """Get SenSim sensor values."""
+        id = int(service.data["id"])
+        response = await self.controller.senSimGetValues(id)
+
+        return {
+            "wind_digital": response.windDigital.value if hasattr(response.windDigital, 'value') else response.windDigital,
+            "rain_digital": response.rainDigital.value if hasattr(response.rainDigital, 'value') else response.rainDigital,
+            "temp_digital": response.tempDigital.value if hasattr(response.tempDigital, 'value') else response.tempDigital,
+            "light_digital": response.lightDigital.value if hasattr(response.lightDigital, 'value') else response.lightDigital,
+            "temp_analog": response.tempAnalog,
+            "wind_analog": response.windAnalog,
+            "sun_1_analog": response.sun1Analog,
+            "day_light_analog": response.dayLightAnalog,
+            "sun_2_analog": response.sun2Analog,
+            "sun_3_analog": response.sun3Analog,
+        }
+    
+    async def sensim_set_values(
+            self, service: ServiceCall
+    ) -> None:
+        """Set SenSim sensor values."""
+        id = int(service.data["id"])
+        wind_digital = int(service.data.get("wind_digital", 0))
+        rain_digital = int(service.data.get("rain_digital", 0))
+        temp_digital = int(service.data.get("temp_digital", 0))
+        light_digital = int(service.data.get("light_digital", 0))
+        temp_analog = int(service.data.get("temp_analog", 0))
+        wind_analog = int(service.data.get("wind_analog", 0))
+        sun_1_analog = int(service.data.get("sun_1_analog", 0))
+        day_light_analog = int(service.data.get("day_light_analog", 0))
+        sun_2_analog = int(service.data.get("sun_2_analog", 0))
+        sun_3_analog = int(service.data.get("sun_3_analog", 0))
+        response = await self.controller.senSimSetValues(
+            id, wind_digital, rain_digital, temp_digital, light_digital,
+            temp_analog, wind_analog, sun_1_analog, day_light_analog,
+            sun_2_analog, sun_3_analog
+        )
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_set_label(
+            self, service: ServiceCall
+    ) -> None:
+        """Set SenSim label."""
+        id = int(service.data["id"])
+        label = service.data["label"]
+        response = await self.controller.senSimSetLabel(id, label)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_drive(
+            self, service: ServiceCall
+    ) -> None:
+        """Drive SenSim (send simulated sensor values to actuators)."""
+        id = int(service.data["id"])
+        command = SenSimCommandType[service.data["command"]]
+        response = await self.controller.senSimDrive(id, command)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_store(
+            self, service: ServiceCall
+    ) -> None:
+        """Store SenSim to actor."""
+        id = int(service.data["id"])
+        actor_id = int(service.data["actor_id"])
+        response = await self.controller.senSimStore(id, actor_id)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_delete(
+            self, service: ServiceCall
+    ) -> None:
+        """Delete SenSim from actor."""
+        id = int(service.data["id"])
+        actor_id = int(service.data["actor_id"])
+        response = await self.controller.senSimDelete(id, actor_id)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_factory(
+            self, service: ServiceCall
+    ) -> None:
+        """Factory reset SenSim."""
+        id = int(service.data["id"])
+        response = await self.controller.senSimFactory(id)
+
+        return {
+            "state": response,
+        }
+    
+    async def sensim_get_test(
+            self, service: ServiceCall
+    ) -> None:
+        """Get SenSim test mode."""
+        id = int(service.data["id"])
+        response = await self.controller.senSimGetTest(id)
+
+        return {
+            "id": response.id,
+            "test_mode": response.testMode,
+        }
+    
+    async def sensim_set_test(
+            self, service: ServiceCall
+    ) -> None:
+        """Set SenSim test mode."""
+        id = int(service.data["id"])
+        test_mode = int(service.data["test_mode"])
+        response = await self.controller.senSimSetTest(id, test_mode)
+
+        return {
+            "state": response,
+        }
+    
+    # Firmware Services
+
+    async def firmware_get_version(
+            self, service: ServiceCall
+    ) -> None:
+        """Get firmware version information."""
+        response = await self.controller.firmwareGetVersion()
+
+        return {
+            "version": response.version if hasattr(response, 'version') else "unknown",
+            "state": response.state if hasattr(response, 'state') else "unknown",
+        }
+    
+    async def firmware_update(
+            self, service: ServiceCall
+    ) -> None:
+        """Trigger firmware update."""
+        response = await self.controller.firmwareUpdate()
+
+        return {
+            "state": response,
+        }
+    
     async def set_led(
             self, service: ServiceCall
     ) -> ServiceResponse:

@@ -2,7 +2,7 @@
 
 # Selve NG – Home Assistant Integration
 
-[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/Kannix2005/homeassistant-selve/releases)
+[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/Kannix2005/homeassistant-selve/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 
 Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `python-selve-new`.
@@ -58,6 +58,11 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 | `selve.set_forward` / `selve.get_forward` | Configure/query forwarding. |
 | `selve.set_events` / `selve.get_events` | Enable/inspect event subscriptions. |
 | `selve.get_duty` / `selve.get_rf` | Read duty cycle / RF info. |
+| `selve.set_duty` / `selve.set_rf` | Set duty cycle mode / RF base address. |
+| `selve.get_temperature` | Read internal gateway temperature. |
+| `selve.firmware_get_version` | Read firmware version from gateway. |
+| `selve.firmware_update` | Trigger firmware update (use with caution). |
+| `selve.command_result` | Retrieve pending command result. |
 | `selve.update_all_devices` | Refresh values for all known devices. |
 | `selve.reset` / `selve.factory_reset_gateway` | Reset gateway (factory reset is destructive). |
 
@@ -74,6 +79,7 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 | `selve.device_set_value` / `selve.device_set_target_value` / `selve.device_set_state` | Manually override current/target/state. |
 | `selve.device_move_up` / `selve.device_move_down` / `selve.device_move_pos1` / `selve.device_move_pos2` / `selve.device_move_pos` / `selve.device_move_stop` | Movement commands (Commeo/Iveo). |
 | `selve.device_move_step_up` / `selve.device_move_step_down` | Step/tilt movement (degrees). |
+| `selve.device_save_pos1` / `selve.device_save_pos2` | Save current position as Pos1/Pos2. |
 
 ### Group services
 | Service | Purpose |
@@ -92,6 +98,19 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 | `selve.iveo_factory_reset` | Factory reset Iveo device (destructive). |
 | `selve.iveo_teach` / `selve.iveo_learn` | Teaching/learning procedures. |
 | `selve.iveo_command_manual` / `selve.iveo_command_automatic` | Manual/automatic commands (STOP/UP/DOWN/POS1/POS2/etc.). |
+| `selve.iveo_command_result` | Retrieve pending Iveo command result. |
+
+### senSim services
+| Service | Purpose |
+| --- | --- |
+| `selve.sensim_get_ids` | List senSim devices. |
+| `selve.sensim_get_config` / `selve.sensim_set_config` | Read/write senSim configuration. |
+| `selve.sensim_get_values` / `selve.sensim_set_values` | Read/write senSim sensor values. |
+| `selve.sensim_get_test` / `selve.sensim_set_test` | Read/write senSim test mode. |
+| `selve.sensim_set_label` | Update senSim label. |
+| `selve.sensim_drive` / `selve.sensim_store` | Drive/store senSim commands. |
+| `selve.sensim_delete` | Delete a senSim device. |
+| `selve.sensim_factory` | Factory reset senSim device. |
 
 ### Sensor services
 | Service | Purpose |
@@ -119,7 +138,8 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 - Logs: filter HA logs for `custom_components.selve`.
 
 ## Notes
-- Tested with `python-selve-new` 2.4.0.
+- Tested with `python-selve-new` 2.5.0.
+- 99 services covering the complete Selve USB-RF Gateway protocol.
 - Contributions and issues welcome via the GitHub issue tracker.
 
 ## Known limitations

@@ -69,13 +69,13 @@ async def async_setup_entry(
 
     devicelist = []
     for id in selve.devices["device"]:
-        devicelist.append(SelveCover(selve.devices["device"][id], selve))
+        devicelist.append(SelveCover(selve.devices["device"][id], selve, config_entry))
 
     for id in selve.devices["iveo"]:
-        devicelist.append(SelveCover(selve.devices["iveo"][id], selve))
+        devicelist.append(SelveCover(selve.devices["iveo"][id], selve, config_entry))
 
     for id in selve.devices["group"]:
-        devicelist.append(SelveCover(selve.devices["group"][id], selve))
+        devicelist.append(SelveCover(selve.devices["group"][id], selve, config_entry))
 
     async_add_entities(devicelist, True)
 
@@ -88,11 +88,17 @@ async def update_listener(hass, config_entry):
 class SelveCover(CoverEntity):
     """Representation a Selve Cover."""
 
-    def __init__(self, device, selve) -> None:
+    def __init__(self, device, selve, config_entry) -> None:
         self.selve_device = device
         self.selve_device.openState = 50
         self.selve = selve
+        self._config_entry = config_entry
         self._name = str(self.selve_device.name)
+
+    @property
+    def open_close_fix(self) -> bool:
+        """Return True if the open/close boundary fix is enabled."""
+        return self._config_entry.options.get("open_close_fix", False)
 
     @property
     def unique_id(self):
@@ -198,16 +204,22 @@ class SelveCover(CoverEntity):
     def current_cover_position(self):
         """
         Return current position of cover.
-        0 is closed, 100 is fully open. Can be reversed by options.
+        0 is closed, 100 is fully open.
+        When open_close_fix is enabled, values 0-1 are clamped to 0 (closed)
+        and values 99-100 are clamped to 100 (open) to fix incorrect state
+        reporting for covers that report 99 when fully open or 1 when fully closed.
         """
-        # if self.isCommeo:
-
-        # if self.controller.config.get("switch_dir"):
-        #     return self.selve_device.value
         if self.isGroup:
             return 50
 
-        return 100 - self.selve_device.value
+        value = self.selve_device.value
+        if self.open_close_fix:
+            value = (
+                0 if value < 2
+                else 100 if value > 98
+                else value
+            )
+        return 100 - value
 
     @property
     def current_cover_tilt_position(self):

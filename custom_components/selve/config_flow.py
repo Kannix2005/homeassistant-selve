@@ -140,8 +140,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "switch_dir",
-                        default=self.config_entry.options.get("switch_dir", False),
+                        "open_close_fix",
+                        default=self.config_entry.options.get("open_close_fix", False),
                     ): bool
                 }
             ),

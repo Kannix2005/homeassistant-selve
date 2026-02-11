@@ -2,7 +2,7 @@
 
 # Selve NG – Home Assistant Integration
 
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/Kannix2005/homeassistant-selve/releases)
+[![Version](https://img.shields.io/badge/version-3.3.1-blue.svg)](https://github.com/Kannix2005/homeassistant-selve/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 
 Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `python-selve-new`.
@@ -13,7 +13,7 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 - Direct USB control, no cloud required.
 - Cover support (shutters/blinds/awnings), groups, positions, and Commeo tilt.
 - Auto-discovery of devices and serial ports.
-- Option `switch_dir` to invert cover positions (0 % open vs. closed).
+- Option `open_close_fix` to clamp near-boundary cover positions for correct open/closed reporting.
 - Extra attributes (gateway state, target value, communication type).
 - Services for gateway info, LED control, and device refresh.
 
@@ -37,9 +37,9 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 3. Finish: cover entities are created per device/group.
 
 ### Options
-- `switch_dir`: Invert position semantics.
-	- Off (default): 0 % = closed, 100 % = open.
-	- On: 0 % = open, 100 % = closed (commands are inverted accordingly).
+- `open_close_fix`: Clamp cover positions near boundaries for correct state reporting.
+	- Off (default): Raw position values from the gateway are used as-is.
+	- On: Values 0–1 % are reported as 0 % (fully closed) and 99–100 % as 100 % (fully open). Useful when covers report 99 instead of 100 when fully opened, or 1 instead of 0 when fully closed. See [#41](https://github.com/Kannix2005/homeassistant-selve/issues/41).
 
 ## Usage
 - **Cover control**: standard cover entities support `set_cover_position`; Commeo devices also support tilt.
@@ -134,7 +134,7 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 
 ## Troubleshooting
 - No devices found: verify the USB port is available and not locked by another process.
-- Wrong position shown: toggle `switch_dir` in options and reload the integration.
+- Wrong position shown: enable `open_close_fix` in the integration options if your covers report 99/1 instead of 100/0 at the limits.
 - Logs: filter HA logs for `custom_components.selve`.
 
 ## Notes
@@ -145,5 +145,4 @@ Local control of Selve USB-RF gateways and covers (Commeo/Iveo/Groups) via `pyth
 ## Known limitations
 - Only covers (and related groups) are exposed as entities; other device types may be available via services but not as native HA entities.
 - Gateway must be reachable via a local serial/USB port; no network transport is supported.
-- Position inversion relies on `switch_dir` and the underlying library behavior; mixed-direction setups per device are not supported.
 - Iveo support is command-based (one-way); state reporting is limited compared to Commeo.

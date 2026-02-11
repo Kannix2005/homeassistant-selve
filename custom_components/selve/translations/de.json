@@ -31,7 +31,10 @@
             "title": "Selve Einstellungen",
             "description": "",
             "data": {
-              "switch_dir": "Zustandswert der Abdeckungen umkehren (Offen ist jetzt 0%)"
+              "open_close_fix": "Auf/Zu Korrektur"
+            },
+            "data_description": {
+              "open_close_fix": "Positionswerte an den Grenzen korrigieren: Werte von 0-1% werden als vollständig geschlossen (0%) und 99-100% als vollständig geöffnet (100%) gemeldet. Nützlich wenn Abdeckungen 99 statt 100 bei vollständig geöffnet oder 1 statt 0 bei vollständig geschlossen melden."
             }
           }
         }

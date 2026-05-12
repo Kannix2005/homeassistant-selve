@@ -16,7 +16,7 @@ from homeassistant.helpers import config_validation as cv, entity_platform, serv
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers import device_registry as dr
-from selve import Selve, PortError, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse, SenderTeachResultResponse, SensorTeachResultResponse, DeviceScanResultResponse, DeviceFunctions, DeviceType, SelveTypes, MovementState
+from selve import Selve, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse, SenderTeachResultResponse, SensorTeachResultResponse, DeviceScanResultResponse, DeviceFunctions, DeviceType, SelveTypes, MovementState
 from selve import DeviceCommandType, DriveCommandIveo, SenSimCommandType
 
 REQUIREMENTS = ["python-selve-new"]
@@ -140,18 +140,8 @@ class SelveGateway(object):
         loop=asyncio.get_running_loop()
 
 
-        try:
-            self.controller = Selve(port=port, logger=_LOGGER, loop=loop)
-            await self.controller.setup(discover=True)
-        except PortError as ex:
-            _LOGGER.exception("Error when trying to connect to the selve gateway - trying autodetection")
-            try:
-                self.controller = Selve(port=port, logger=_LOGGER)
-                await self.controller.setup(discover=True)
-            except Exception as e:
-                _LOGGER.exception("Error when trying to connect to the selve gateway - also failed with autodetection")
-
-            return False
+        self.controller = Selve(port=port, logger=_LOGGER, loop=loop)
+        await self.controller.setup(discover=True)
 
         self.gatewayId = await self.controller.getGatewaySerial()
         self.gatewayFW = await self.controller.getGatewayFirmwareVersion()
@@ -1558,10 +1548,7 @@ class SelveGateway(object):
     #Listeners
     async def update_listener(self, hass: HomeAssistant, entry: ConfigEntry):
         """Handle options update."""
-        if entry.options["switch_dir"] is True:
-            flag = 1
-        else:
-            flag = 0
+        flag = 1 if entry.options.get("open_close_fix", False) else 0
         self.controller.updateOptions(flag)
         await self.controller.updateAllDevices()
         await hass.config_entries.async_reload(entry.entry_id)

@@ -3,20 +3,18 @@
         "title": "Selve NG",
         "step": {
             "user": {
-                "description": "Please connect your Selve USB Stick to your system. The plugin will try to auto-detect the port.",
+                "description": "Connect your Selve USB stick or configure an ESPHome Serial Proxy. Select a detected port or enter a custom URL (e.g. socket://192.168.1.10:6638).",
                 "title": "Selve NG Integration Setup",
                 "data": {
-                    "autodiscovery": "Autodiscovery",
                     "port": "Port"
                 },
                 "data_description": {
-                    "autodiscovery": "Discover port automatically",
-                    "port": "Manually chosen port"
+                    "port": "Serial port (e.g. /dev/ttyUSB0) or socket URL (e.g. socket://192.168.1.10:6638)"
                 }
             }
         },
         "error": {
-            "gateway_not_ready": "Gateway seems to be not ready. Is it properly connected?",
+            "cannot_connect": "Cannot connect to the gateway. Check the port and try again.",
             "invalid_port": "Port seems to be incorrect or no gateway found.",
             "unknown": "Unknown error."
         },
@@ -31,9 +29,11 @@
             "title": "Selve options",
             "description": "",
             "data": {
+              "port": "Port",
               "open_close_fix": "Open/Close Fix"
             },
             "data_description": {
+              "port": "Serial port (e.g. /dev/ttyUSB0) or socket URL (e.g. socket://192.168.1.10:6638)",
               "open_close_fix": "Clamp cover positions near boundaries: values 0-1% are reported as fully closed (0%) and 99-100% as fully open (100%). Useful when covers report 99 instead of 100 when fully open, or 1 instead of 0 when fully closed."
             }
           }

@@ -104,6 +104,22 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     return True
 
 
+def _serialize_event_value(v):
+    """Recursively convert non-JSON-serializable values to plain Python types."""
+    from enum import Enum
+    if isinstance(v, (str, int, float, bool, type(None))):
+        return v
+    if isinstance(v, (list, tuple)):
+        return [_serialize_event_value(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _serialize_event_value(val) for k, val in v.items()}
+    if isinstance(v, Enum):
+        return v.name
+    if hasattr(v, 'cdata'):  # untangle.Element
+        return v.cdata
+    return str(v)
+
+
 class SelveGateway(object):
     """Manages a single selve gateway."""
 
@@ -114,6 +130,7 @@ class SelveGateway(object):
         self.controller = None
         self.gatewayId = None
         self.gatewayFW = None
+        self._last_scan_result = None
 
     @property
     def port(self):
@@ -508,18 +525,24 @@ class SelveGateway(object):
         """"""
         response = await self.controller.scanResult()
 
-        if not response or isinstance(response, bool):
+        if response and not isinstance(response, bool) and hasattr(response, 'foundIds'):
             return {
-                "foundIds": [],
-                "noNewDevices": True,
-                "scanState": 0,
+                "foundIds": response.foundIds,
+                "noNewDevices": response.noNewDevices,
+                "scanState": response.scanState,
             }
 
-        return {
-            "foundIds": response.foundIds,
-            "noNewDevices": response.noNewDevices,
-            "scanState": response.scanState,
-        }
+        # scanResult() always times out because the library's dispatch loop
+        # swallows DeviceScanResultResponse before resolving the future.
+        # The actual result flows via the event callback — use the cached value.
+        if self._last_scan_result is not None:
+            return {
+                "foundIds": self._last_scan_result.foundIds,
+                "noNewDevices": self._last_scan_result.noNewDevices,
+                "scanState": self._last_scan_result.scanState,
+            }
+
+        return {"foundIds": [], "noNewDevices": True, "scanState": 0}
     
     async def device_save(
             self, service: ServiceCall
@@ -1676,7 +1699,7 @@ class SelveGateway(object):
             }
 
         if isinstance(response, DeviceScanResultResponse):
-            
+            self._last_scan_result = response
             event_data = {
                 "device_id": self.gatewayId,
                 "type": "device_scan_event",
@@ -1686,15 +1709,14 @@ class SelveGateway(object):
                 "noNewDevices": response.noNewDevices,
                 "scanState": response.scanState
             }
-        
+
         if not event_data:
             event_data = {
                 "device_id": self.gatewayId,
                 "type": "unknown_event"
             }
 
-
-        self.hass.bus.async_fire("selve_event", event_data)
+        self.hass.bus.async_fire("selve_event", {k: _serialize_event_value(v) for k, v in event_data.items()})
 
 
     async def async_reset(self):

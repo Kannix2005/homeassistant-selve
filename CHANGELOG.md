@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.8] - 2026-05-13
+
+### Fixed
+- `selve_event` not JSON serializable: event data contained `untangle.Element` objects (e.g. `response.name` for log events), `LogType` / `ParameterType` enums, and similar non-JSON types. Added `_serialize_event_value` helper that converts enums to `.name`, untangle elements to `.cdata`, and recursively handles lists/tuples, so the HA recorder no longer logs `Type is not JSON serializable: Element` warnings.
+- `device_scan_result` service always returning empty: `scanResult()` always times out because the library's dispatch loop intercepts `DeviceScanResultResponse` (to fire the event callback) and returns `True` instead of the response object, leaving the sync future unresolved. The fix caches the last scan result in `_event_callback` (`self._last_scan_result`) and returns it from the service when the direct poll fails.
+
 ## [3.3.7] - 2026-05-13
 
 ### Fixed

@@ -178,7 +178,9 @@ class SelveCover(CoverEntity):
                 CoverEntityFeature.OPEN
                 | CoverEntityFeature.CLOSE
                 | CoverEntityFeature.STOP
-                | CoverEntityFeature.SET_POSITION
+                | CoverEntityFeature.OPEN_TILT
+                | CoverEntityFeature.CLOSE_TILT
+                | CoverEntityFeature.STOP_TILT
             )
         else:
             return ()

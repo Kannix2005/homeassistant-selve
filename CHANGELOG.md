@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.7] - 2026-05-13
+
+### Fixed
+- `device_scan_result` service crash: `scanResult()` can return `False` when no scan is running; accessing `.foundIds` on a boolean caused `AttributeError`. Now guarded — returns empty idle result when response is not an object. (fixes #42)
+- Iveo cover tilt/intermediate positions: `OPEN_TILT`, `CLOSE_TILT`, and `STOP_TILT` features were missing from `supported_features` for Iveo devices, so HA never exposed the tilt buttons. The underlying `moveDevicePos1` (POS1) and `moveDevicePos2` (POS2) commands were already implemented in python-selve-new. Removed misleading `SET_POSITION` from Iveo features (mapped to up/down only, not real positioning). (fixes #22)
+
 ## [3.3.0] - 2026-02-11
 
 ### Added

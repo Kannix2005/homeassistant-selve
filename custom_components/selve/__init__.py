@@ -508,6 +508,13 @@ class SelveGateway(object):
         """"""
         response = await self.controller.scanResult()
 
+        if not response or isinstance(response, bool):
+            return {
+                "foundIds": [],
+                "noNewDevices": True,
+                "scanState": 0,
+            }
+
         return {
             "foundIds": response.foundIds,
             "noNewDevices": response.noNewDevices,

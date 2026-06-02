@@ -215,7 +215,14 @@ class SelveCover(CoverEntity):
             return 50
 
         value = self.selve_device.value
-        if self.open_close_fix:
+
+        if self.isIveo:
+            value = (
+                1 if value == 0
+                else 99 if value == 100
+                else value
+            )
+        elif self.open_close_fix:
             value = (
                 0 if value < 2
                 else 100 if value > 98

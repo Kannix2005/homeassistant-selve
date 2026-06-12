@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.11] - 2026-06-12
+
+### Fixed
+- Device registry deprecation warnings ("passes a non-string value of type CommunicationType as model"): `device_info` now passes `model` as string (`.name`) and `sw_version` as string. The enum values would stop working in Home Assistant 2026.12.
+
 ## [3.3.10] - 2026-06-12
 
 ### Fixed

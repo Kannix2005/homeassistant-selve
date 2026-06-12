@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.10] - 2026-06-12
+
+### Fixed
+- **No more "Serial: no data for 60s — reconnecting" every minute**: python-selve-new 2.5.13 sends a keepalive ping after 30s of link silence, so the serial idle-reconnect only fires when the port is actually dead. This also closes a window in which gateway events (e.g. covers moved via physical remote) could be silently lost during the periodic reconnect.
+
 ## [3.3.9] - 2026-06-12
 
 ### Changed

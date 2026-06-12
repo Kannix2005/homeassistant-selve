@@ -92,11 +92,25 @@ class SelveSensor(BinarySensorEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
-        self.selve.register_callback(self.async_write_ha_state)
+        self.selve.register_callback(self._on_device_update)
 
     async def async_will_remove_from_hass(self) -> None:
         """Entity being removed from hass."""
-        self.selve.remove_callback(self.async_write_ha_state)
+        self.selve.remove_callback(self._on_device_update)
+
+    @callback
+    def _on_device_update(self, device=None) -> None:
+        """Write state only when our own device changed."""
+        if device is not None:
+            if (
+                getattr(device, "id", None) != self.selve_device.id
+                or getattr(device, "device_type", None)
+                != self.selve_device.device_type
+            ):
+                return
+            # discovery may replace the stored object - follow it
+            self.selve_device = device
+        self.async_write_ha_state()
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -151,9 +165,7 @@ class SelveSensor(BinarySensorEntity):
         The return type of this call depends on the attribute that
         is configured.
         """
-        attr = getattr(self.selve_device, self.description.key, None)
-        _LOGGER.debug("Attr " + str(self.description.key) + " : " + str(attr))
-        return attr
+        return getattr(self.selve_device, self.description.key, None)
 
     @property
     def device_class(self):

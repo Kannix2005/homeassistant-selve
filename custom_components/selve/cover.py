@@ -117,14 +117,27 @@ class SelveCover(CoverEntity):
 
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
-        if self.isCommeo:
-            await self.selve.updateCommeoDeviceValuesAsync(self.selve_device.id)
-
-        self.selve.register_callback(self.async_write_ha_state)
+        # Values are already fresh from the gateway discovery at startup,
+        # no extra serial round-trip needed here.
+        self.selve.register_callback(self._on_device_update)
 
     async def async_will_remove_from_hass(self) -> None:
         """Entity being removed from hass."""
-        self.selve.remove_callback(self.async_write_ha_state)
+        self.selve.remove_callback(self._on_device_update)
+
+    @callback
+    def _on_device_update(self, device=None) -> None:
+        """Write state only when our own device changed."""
+        if device is not None:
+            if (
+                getattr(device, "id", None) != self.selve_device.id
+                or getattr(device, "device_type", None)
+                != self.selve_device.device_type
+            ):
+                return
+            # discovery may replace the stored object - follow it
+            self.selve_device = device
+        self.async_write_ha_state()
 
     async def async_update(self):
         """Update method. Not needed when using callbacks."""

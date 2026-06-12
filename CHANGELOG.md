@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.9] - 2026-06-12
+
+### Changed
+- **python-selve-new 2.5.12**: response-paced serial transmission instead of a fixed 100ms delay per command — device discovery at startup is roughly 3x faster, commands run at gateway speed (~30-40ms). Gateway error replies no longer stall service calls for 10+ seconds.
+- **Per-device state updates**: cover and binary_sensor entities now only write their state when *their own* device changed. Previously every gateway event triggered a state write on every Selve entity (N entities x M events during movement).
+- Removed the redundant per-entity `DeviceGetValues` round-trip in `async_added_to_hass` — values are already fresh from gateway discovery at startup.
+- Removed per-access debug logging in the binary_sensor `state` property (log spam, string building on every state machine read).
+
 ## [3.3.8] - 2026-05-13
 
 ### Fixed

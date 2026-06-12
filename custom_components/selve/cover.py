@@ -210,8 +210,8 @@ class SelveCover(CoverEntity):
             },
             name=self.name,
             manufacturer="Selve",
-            model=self.selve_device.communicationType,
-            sw_version=1,
+            model=self.selve_device.communicationType.name,
+            sw_version="1",
             via_device=(DOMAIN, self.selve.gateway_id),
         )
 

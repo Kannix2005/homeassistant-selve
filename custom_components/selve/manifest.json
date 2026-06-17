@@ -7,9 +7,9 @@
         "@Kannix2005"
     ],
     "requirements": [
-        "python-selve-new==2.5.13"
+        "python-selve-new==2.5.14"
     ],
-    "version": "3.3.11",
+    "version": "3.3.12",
     "iot_class": "local_polling",
     "config_flow": true,
     "loggers": [

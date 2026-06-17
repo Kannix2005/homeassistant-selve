@@ -72,13 +72,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     controller = hass.data[DOMAIN][entry.data[CONF_PORT]]
-    platforms = ["cover", "binary_sensor"]
+    platforms = ["cover", "binary_sensor", "sensor"]
     unloaded = all(
         await asyncio.gather(
             *[
                 hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in platforms
+                for platform in platforms
             ]
         )
     )
@@ -183,7 +182,7 @@ class SelveGateway(object):
         self.controller.register_event_callback(self._event_callback)
 
         hass.async_create_task(
-            hass.config_entries.async_forward_entry_setups(self.config_entry, ["cover", "binary_sensor"])
+            hass.config_entries.async_forward_entry_setups(self.config_entry, ["cover", "binary_sensor", "sensor"])
         )
 
         # Gateway
@@ -1725,6 +1724,10 @@ class SelveGateway(object):
 
         if self.controller is None:
             return True
+
+        await self.hass.config_entries.async_forward_entry_unload(
+            self.config_entry, "sensor"
+        )
 
         await self.hass.config_entries.async_forward_entry_unload(
             self.config_entry, "binary_sensor"

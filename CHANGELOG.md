@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.12] - 2026-06-17
+
+### Added
+- **More reliable IVEO covers** (python-selve-new 2.5.14): IVEO is one-way (no motor feedback), so a lost RF telegram silently left the shutter where it was while HA showed it moved — the cause of "kitchen sometimes doesn't react". IVEO drive commands now repeat the telegram (handsender-style), check the gateway's send acknowledgement, and wait out a blocked duty cycle instead of firing into it.
+- **Gateway RF duty-cycle sensor** (diagnostic): exposes the 868 MHz airtime utilization with a `sending_blocked` attribute, so multi-cover scenes hitting the duty limit are visible and usable in automations.
+
+### Fixed
+- Unload path only ever unloaded the `cover` platform (it iterated `PLATFORMS=["cover"]`), so `binary_sensor` entities were never properly torn down on reload. All platforms (`cover`, `binary_sensor`, `sensor`) now unload correctly.
+
 ## [3.3.11] - 2026-06-12
 
 ### Fixed

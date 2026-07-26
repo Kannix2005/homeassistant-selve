@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.13] - 2026-07-26
+
+### Fixed
+- **Reloading the integration works again**: `async_unload_entry` and the gateway's `async_reset()` both unloaded all three platforms — the second unload made every reload fail with `require_restart` and left all entities unavailable until a full Home Assistant restart. Platforms now unload exactly once.
+- **Entities go unavailable when the gateway is dead** instead of showing frozen state: availability of covers, sensors and binary sensors is now bound to `Selve.connected` (python-selve-new 2.5.15). During the 2026-07-25 gateway hang, covers showed a stale "opening" for 12+ hours and swallowed commands without any visible failure — that state is now visibly "unavailable".
+- Cover position handles the library's new "position unknown" (`None`) — no more phantom 50% jumps after stops, no crash on unknown positions.
+
+### Changed
+- Requires python-selve-new 2.5.15 (gateway-hang self-recovery — see its changelog).
+
 ## [3.3.12] - 2026-06-17
 
 ### Added

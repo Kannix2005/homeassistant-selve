@@ -68,6 +68,14 @@ class SelveDutyCycleSensor(SensorEntity):
             self.async_write_ha_state()
 
     @property
+    def available(self) -> bool:
+        """Bind availability to the gateway connection."""
+        connected = getattr(self.selve, "connected", None)
+        if connected is None:
+            return True
+        return bool(connected)
+
+    @property
     def native_value(self):
         return self.selve.utilization
 

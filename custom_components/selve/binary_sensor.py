@@ -98,6 +98,14 @@ class SelveSensor(BinarySensorEntity):
         """Entity being removed from hass."""
         self.selve.remove_callback(self._on_device_update)
 
+    @property
+    def available(self) -> bool:
+        """Bind availability to the gateway connection."""
+        connected = getattr(self.selve, "connected", None)
+        if connected is None:
+            return True
+        return bool(connected)
+
     @callback
     def _on_device_update(self, device=None) -> None:
         """Write state only when our own device changed."""

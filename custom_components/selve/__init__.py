@@ -72,14 +72,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     controller = hass.data[DOMAIN][entry.data[CONF_PORT]]
-    platforms = ["cover", "binary_sensor", "sensor"]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in platforms
-            ]
-        )
+    # Platforms are unloaded exactly once here; async_reset() must not unload
+    # them again — the double unload made every reload fail with
+    # "require_restart" and left all entities unavailable.
+    unloaded = await hass.config_entries.async_unload_platforms(
+        entry, ["cover", "binary_sensor", "sensor"]
     )
 
     await controller.async_reset()
@@ -1719,22 +1716,15 @@ class SelveGateway(object):
 
 
     async def async_reset(self):
+        """Stop the gateway connection.
+
+        Platform unload is async_unload_entry's job — doing it here as well
+        unloaded every platform twice and broke config entry reloads.
+        """
         if self.port is None:
             return True
 
         if self.controller is None:
             return True
-
-        await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, "sensor"
-        )
-
-        await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, "binary_sensor"
-        )
-
-        await self.hass.config_entries.async_forward_entry_unload(
-            self.config_entry, "cover"
-        )
 
         await self.controller.stopGateway()

@@ -101,6 +101,18 @@ class SelveCover(CoverEntity):
         return self._config_entry.options.get("open_close_fix", False)
 
     @property
+    def available(self) -> bool:
+        """Bind availability to the gateway connection.
+
+        Without this, entities on a dead gateway kept their last (frozen)
+        state for hours and commands vanished without any visible failure.
+        """
+        connected = getattr(self.selve, "connected", None)
+        if connected is None:  # older library without the property
+            return True
+        return bool(connected)
+
+    @property
     def unique_id(self):
         """Return the unique id base on the id returned by gateway."""
         return str(self.selve_device.device_type.value) + str(self.selve_device.id)
@@ -228,6 +240,10 @@ class SelveCover(CoverEntity):
             return 50
 
         value = self.selve_device.value
+        if value is None:
+            # Gateway reported "position unknown" (0x8000 sentinel) or an
+            # IVEO send was never confirmed — better no position than a wrong one.
+            return None
         if self.open_close_fix:
             value = (
                 0 if value < 2
@@ -247,6 +263,8 @@ class SelveCover(CoverEntity):
         if self.isGroup:
             return 50
 
+        if self.selve_device.value is None:
+            return None
         value = (
             2
             if self.selve_device.value < 2

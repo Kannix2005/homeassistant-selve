@@ -10,7 +10,7 @@ import voluptuous as vol
 
 from homeassistant.const import CONF_PORT
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import PlatformNotReady
+from homeassistant.exceptions import HomeAssistantError, PlatformNotReady
 from homeassistant.components.cover import (
     CoverDeviceClass,
     CoverEntity,
@@ -122,11 +122,6 @@ class SelveCover(CoverEntity):
         """Return the name of the device."""
         return self._name
 
-    @property
-    def device_state_attributes(self):
-        """Return the state attributes of the device."""
-        return {"selve_device_id": self.selve_device.id}
-
     async def async_added_to_hass(self) -> None:
         """Run when this Entity has been added to HA."""
         # Values are already fresh from the gateway discovery at startup,
@@ -237,7 +232,9 @@ class SelveCover(CoverEntity):
         reporting for covers that report 99 when fully open or 1 when fully closed.
         """
         if self.isGroup:
-            return 50
+            # A group has no position of its own. Reporting 50 made is_closed
+            # permanently False, so automations checking a group never worked.
+            return None
 
         value = self.selve_device.value
         if value is None:
@@ -261,7 +258,7 @@ class SelveCover(CoverEntity):
         # if self.isCommeo:
 
         if self.isGroup:
-            return 50
+            return None
 
         if self.selve_device.value is None:
             return None
@@ -339,49 +336,63 @@ class SelveCover(CoverEntity):
             "gatewayState": gatewayState,
         }
 
+    async def _command(self, description, coro):
+        """Run a gateway command and surface failures to the user.
+
+        Without this the library exception surfaces as a bare "unknown error"
+        toast, and automations abort on a raw traceback.
+        """
+        try:
+            await coro
+        except Exception as ex:
+            raise HomeAssistantError(
+                f"{description} failed for {self._name}: {ex}"
+            ) from ex
+
     async def async_open_cover(self, **kwargs):
         """Open the cover."""
         if self.isGroup:
-            await self.selve.moveGroupUp(self.selve_device)
+            await self._command("Open", self.selve.moveGroupUp(self.selve_device))
             return
-        await self.selve.moveDeviceUp(self.selve_device)
+        await self._command("Open", self.selve.moveDeviceUp(self.selve_device))
 
     async def async_open_cover_tilt(self, **kwargs):
         """Open the cover."""
-        await self.selve.moveDevicePos1(self.selve_device)
+        await self._command("Open tilt", self.selve.moveDevicePos1(self.selve_device))
 
     async def async_close_cover(self, **kwargs):
         """Close the cover."""
         if self.isGroup:
-            await self.selve.moveGroupDown(self.selve_device)
+            await self._command("Close", self.selve.moveGroupDown(self.selve_device))
             return
-        await self.selve.moveDeviceDown(self.selve_device)
+        await self._command("Close", self.selve.moveDeviceDown(self.selve_device))
 
     async def async_close_cover_tilt(self, **kwargs):
         """Close the cover."""
-        await self.selve.moveDevicePos2(self.selve_device)
+        await self._command("Close tilt", self.selve.moveDevicePos2(self.selve_device))
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         if self.isGroup:
-            await self.selve.stopGroup(self.selve_device)
+            await self._command("Stop", self.selve.stopGroup(self.selve_device))
             return
-        await self.selve.stopDevice(self.selve_device)
+        await self._command("Stop", self.selve.stopDevice(self.selve_device))
 
     async def async_stop_cover_tilt(self, **kwargs):
         """Stop the cover."""
-        await self.selve.stopDevice(self.selve_device)
+        await self._command("Stop tilt", self.selve.stopDevice(self.selve_device))
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
 
         if self.isCommeo:
             _current_cover_position = 100 - kwargs.get(ATTR_POSITION)
-            await self.selve.moveDevicePos(
-                self.selve_device, _current_cover_position
+            await self._command(
+                "Set position",
+                self.selve.moveDevicePos(self.selve_device, _current_cover_position),
             )
         else:
             if kwargs.get(ATTR_POSITION) >= 50:
-                await self.selve.moveDeviceUp(self.selve_device)
+                await self._command("Open", self.selve.moveDeviceUp(self.selve_device))
             else:
-                await self.selve.moveDeviceDown(self.selve_device)
+                await self._command("Close", self.selve.moveDeviceDown(self.selve_device))

@@ -14,7 +14,7 @@ import voluptuous as vol
 from homeassistant.const import CONF_PORT
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 from homeassistant.helpers.entity import Entity
-from homeassistant.exceptions import PlatformNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from selve import Selve, DutyCycleResponse, SenderEventResponse, CommeoDeviceEventResponse, SensorEventResponse, LogEventResponse, SenderTeachResultResponse, SensorTeachResultResponse, DeviceScanResultResponse, DeviceFunctions, DeviceType, SelveTypes, MovementState
 from selve import DeviceCommandType, DriveCommandIveo, SenSimCommandType
@@ -65,7 +65,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         await selvegat.async_setup()
     except Exception as ex:
-        raise PlatformNotReady(f"Connection error while connecting to {port}: {ex}") from ex
+        # ConfigEntryNotReady (not PlatformNotReady) is what HA retries with
+        # backoff on entry level — with the wrong one, a gateway that is
+        # briefly absent at startup leaves the integration dead until the
+        # user reloads it by hand.
+        raise ConfigEntryNotReady(f"Connection error while connecting to {port}: {ex}") from ex
     return True
 
  
@@ -92,8 +96,9 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     if config_entry.version == 1:
         new = {**config_entry.data}
 
-        config_entry.version = 2
-        hass.config_entries.async_update_entry(config_entry, data=new)
+        # Version belongs in async_update_entry; assigning it directly is not
+        # part of the ConfigEntry contract any more.
+        hass.config_entries.async_update_entry(config_entry, data=new, version=2)
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 

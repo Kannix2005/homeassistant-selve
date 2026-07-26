@@ -45,6 +45,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             port = user_input[CONF_PORT].strip()
+            # One entry per serial port: two Selve instances on the same port
+            # fight over the same gateway and duplicate every entity.
+            await self.async_set_unique_id(port)
+            self._abort_if_unique_id_configured()
             return self.async_create_entry(title="Selve Gateway", data={CONF_PORT: port})
 
         ports = await self.hass.async_add_executor_job(_get_serial_ports)
@@ -76,10 +80,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             new_port = user_input.get(CONF_PORT, "").strip()
             options_data = {k: v for k, v in user_input.items() if k != CONF_PORT}
             if new_port and new_port != self.config_entry.data.get(CONF_PORT, ""):
+                # Write data and options in one go: updating them separately
+                # fires the update listener twice and starts two overlapping
+                # reloads on the same serial port.
                 self.hass.config_entries.async_update_entry(
                     self.config_entry,
                     data={**self.config_entry.data, CONF_PORT: new_port},
+                    options=options_data,
+                    unique_id=new_port,
                 )
+                return self.async_abort(reason="reconfigure_successful")
             return self.async_create_entry(title="", data=options_data)
 
         ports = await self.hass.async_add_executor_job(_get_serial_ports)

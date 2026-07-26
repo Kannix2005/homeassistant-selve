@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.14] - 2026-07-26
+
+### Fixed
+- **Home Assistant retries the setup again**: `async_setup_entry` raised `PlatformNotReady`, which HA only handles on platform level — on entry level it meant the integration stayed dead after a failed start (e.g. gateway briefly missing from the USB bus) until someone reloaded it by hand. It now raises `ConfigEntryNotReady`.
+- **Cover commands report failures**: open/close/stop/set position now raise `HomeAssistantError` with the device name instead of letting a library exception surface as a bare "unknown error" and aborting automations with a raw traceback.
+- **Group covers no longer claim a position they don't have**: groups reported a hardcoded 50%, which made `is_closed` permanently `False` — every automation or template checking a Selve group was silently wrong. Groups now report an unknown position. Commands are unaffected.
+- Adding the same serial port twice is rejected (`unique_id`), instead of creating a second entry fighting over the same gateway.
+- Changing the port in the options no longer triggers two overlapping reloads on the same port.
+- Binary sensors expose `selve_device_id` again (`device_state_attributes` has been ignored by HA since 2021.12); the same dead property was removed from covers.
+- `async_migrate_entry` passes the new version to `async_update_entry` instead of assigning `config_entry.version` directly.
+
+### Changed
+- Requires python-selve-new 2.5.16 (correct gateway acknowledgements, response-to-request matching, link-state notifications).
+
 ## [3.3.13] - 2026-07-26
 
 ### Fixed

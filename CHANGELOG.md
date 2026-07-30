@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.15] - 2026-07-30
+
+### Fixed
+- **IVEO covers no longer stay in "opening"/"closing"** (python-selve-new 2.5.17): IVEO is one-way — the gateway only confirms that it transmitted and never reports that the motor stopped. The movement state set from that acknowledgement was never cleared, so a shutter driven twice a day appeared to be moving for hours. A travel timer in the library ends the state now.
+
+### Changed
+- Requires python-selve-new 2.5.17.
+
 ## [3.3.14] - 2026-07-26
 
 ### Fixed

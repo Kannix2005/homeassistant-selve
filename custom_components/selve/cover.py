@@ -275,6 +275,16 @@ class SelveCover(CoverEntity):
         return 100 - value
 
     @property
+    def assumed_state(self) -> bool:
+        """IVEO is one-way and groups have no position of their own.
+
+        Their state is only a guess (e.g. "open" after a restart while the
+        screen is actually closed), so the frontend must keep open and close
+        enabled instead of greying out the button the guess says is pointless.
+        """
+        return self.isIveo or self.isGroup
+
+    @property
     def is_closed(self):
         """Return if the cover is closed."""
         if self.current_cover_position is not None:

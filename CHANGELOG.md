@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.16] - 2026-10-04
+
+### Fixed
+- **IVEO pairing works again** (#50): `iveo_teach`, `iveo_learn`, `iveo_command_manual` and many other services crashed with `'bool' object has no attribute 'executed'` whenever the gateway did not answer or rejected the command — the services showed "Unknown error" and no IVEO device could be registered. They now return `state: false` instead (python-selve-new 2.5.18).
+- **Open/close stay usable on IVEO covers** (#45): IVEO never reports its position, so after a restart HA guessed "open" for a closed screen and greyed out the open button. IVEO covers and groups now declare an assumed state, so both buttons are always available.
+- **No more log flood from "COMMEO: Command overwritten"** (#48): the gateway's own diagnostic messages were written to the HA log as warnings/errors. They are logged one level lower now, "Command overwritten" (normal when a newer command replaces a pending one) only at debug level (python-selve-new 2.5.18).
+
+### Changed
+- Requires python-selve-new 2.5.18.
+
 ## [3.3.15] - 2026-07-30
 
 ### Fixed

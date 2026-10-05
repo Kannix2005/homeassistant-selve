@@ -1,7 +1,7 @@
 """
 Support for Selve cover - shutters etc.
 """
-from .const import DOMAIN
+from .const import DOMAIN, via_gateway
 import logging
 import asyncio
 from selve import Selve, PortError
@@ -219,7 +219,7 @@ class SelveCover(CoverEntity):
             manufacturer="Selve",
             model=self.selve_device.communicationType.name,
             sw_version="1",
-            via_device=(DOMAIN, self.selve.gateway_id),
+            **via_gateway(self.selve),
         )
 
     @property

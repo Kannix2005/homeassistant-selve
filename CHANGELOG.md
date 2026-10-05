@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.17] - 2026-10-05
+
+### Fixed
+- Covers and binary sensors link to the gateway device via `via_device_id` instead of the deprecated `via_device` (HA warned on every start; `via_device` stops working in Home Assistant 2027.8). Older HA versions without `via_device_id` keep using `via_device`.
+
 ## [3.3.16] - 2026-10-04
 
 ### Fixed

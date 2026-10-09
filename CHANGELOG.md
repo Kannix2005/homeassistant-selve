@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.18] - 2026-10-09
+
+### Fixed
+- **Covers no longer stay put when several are driven at once.** When an automation moved two or more Commeo covers at the same moment, the gateway reported "COMMEO: Radio line is busy" and one of them never moved, while Home Assistant showed it as open. Commands the gateway reports as failed are now re-sent automatically, up to two times and staggered so they do not collide again (python-selve-new 2.5.19).
+
+### Changed
+- Requires python-selve-new 2.5.19.
+
 ## [3.3.17] - 2026-10-05
 
 ### Fixed

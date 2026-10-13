@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.19] - 2026-10-13
+
+### Fixed
+- **Covers that the gateway confirmed but that never moved are now driven again.** The 3.3.18 fix only caught commands the gateway explicitly reported as failed. At sunrise, with all covers opening within a few seconds, the gateway instead confirmed the command and logged "COMMEO: Radio line is busy" separately — the living room and office covers stayed closed while Home Assistant showed them as open. The underlying cause was that drive commands for several covers left the gateway only ~50 ms apart, so the radio overwrote or dropped them. Radio drive commands are now sent at least 1 s apart, and after an open, close or set-position command the library checks a few seconds later whether the cover actually moved toward its target and re-sends the command if it did not (python-selve-new 2.5.20). Step commands and the stored intermediate positions are never repeated. A morning burst of five covers now takes about 15 s instead of a fraction of a second.
+
+### Changed
+- Requires python-selve-new 2.5.20.
+
 ## [3.3.18] - 2026-10-09
 
 ### Fixed
